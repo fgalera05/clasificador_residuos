@@ -40,6 +40,20 @@ streamlit run app_sistema_experto.py
 
 ---
 
+## 🛠️ Tecnologías Utilizadas
+
+* **Motor de Inferencia (`experta`):**
+  * El core lógico del sistema experto está basado en la biblioteca **`experta`** (una implementación de sistemas expertos en Python inspirada en el clásico lenguaje CLIPS).
+  * Utiliza el **Algoritmo Rete** para emparejamiento rápido de patrones de reglas.
+  * Implementa **Encadenamiento hacia adelante (Forward Chaining)** declarativo por medio de Hechos (`Fact`, `Residuo`, `Clasificado`, `Clasificacion`) y Reglas (`Rule`), permitiendo que el motor infiera dinámicamente nuevas categorías de residuos de acuerdo a sus propiedades físicas (si está limpio, seco, roto).
+
+* **Módulo de Visión Computacional (Clasificación por Imagen):**
+  * La aplicación permite al usuario cargar imágenes del residuo para su análisis en dos etapas: primero el modelo de visión describe el residuo (material/objeto) y luego el sistema experto determina su reciclabilidad. El módulo [src/vision.py](./src/vision.py) soporta dos tecnologías:
+    * **Gemini (Nube):** Modelo `gemini-2.5-flash` mediante la API oficial de Google AI Studio, ofreciendo respuestas rápidas y precisas sin consumir hardware local.
+    * **Hugging Face (Local con PyTorch):** Modelo VLM local `Qwen2-VL-2B-Instruct` cargado con la librería `transformers` y procesado con tensores de PyTorch (`torch`). Está optimizado para ejecutarse en CPU, GPU (NVIDIA CUDA), o aceleradores MPS (Metal Performance Shaders en chips Apple Silicon de macOS).
+
+---
+
 ## 📂 Arquitectura y Archivos Principales
 
 * [app_simple_lookup.py](./app_simple_lookup.py): Interfaz inicial en Streamlit. Realiza clasificación directa sin evaluar estados físicos variables del residuo.
