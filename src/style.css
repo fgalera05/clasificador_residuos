@@ -1,0 +1,478 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+html, body, [class*="css"] {
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* Fondo general */
+.stApp {
+    background-color: #0f1a0f;
+    color: #e8f5e9;
+}
+
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #1a2e1a;
+    border-right: 1px solid #2e4a2e;
+}
+
+/* Título principal */
+.titulo-principal {
+    font-family: 'Space Mono', monospace;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #69f0ae;
+    letter-spacing: -1px;
+    margin-bottom: 0;
+    line-height: 1.1;
+}
+.subtitulo {
+    font-size: 1rem;
+    color: #81c784;
+    margin-top: 4px;
+    font-weight: 300;
+}
+
+/* Cards de resultado */
+.card-resultado {
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+/* --- ESTILOS DE TARJETAS CLARAS PASTEL --- */
+
+/* Reciclables: Verde claro */
+.card-reciclable {
+    background: #e8f5e9 !important;
+    border: 2px solid #81c784 !important;
+    color: #1b5e20 !important;
+}
+.card-reciclable .card-categoria {
+    color: #1b5e20 !important;
+}
+.card-reciclable .card-sub {
+    color: #2e7d32 !important;
+}
+.card-reciclable .card-sub code {
+    background-color: #c8e6c9 !important;
+    color: #1b5e20 !important;
+}
+.card-reciclable .card-contenedor {
+    background: #c8e6c9 !important;
+    border-left: 4px solid #2e7d32 !important;
+    color: #1b5e20 !important;
+}
+.card-reciclable .seccion-titulo {
+    color: #2e7d32 !important;
+}
+.card-reciclable .paso {
+    color: #1b5e20 !important;
+}
+.card-reciclable .paso-num {
+    background: #2e7d32 !important;
+    color: #e8f5e9 !important;
+}
+.card-reciclable .error-item {
+    color: #c62828 !important;
+}
+.card-reciclable .impacto-box {
+    background: #d0e7d2 !important;
+    border: 1px solid #81c784 !important;
+    color: #2e7d32 !important;
+}
+
+/* Basura Común: Gris claro / carbón suave */
+.card-basura {
+    background: #f5f5f5 !important;
+    border: 2px solid #b0bec5 !important;
+    color: #263238 !important;
+}
+.card-basura .card-categoria {
+    color: #263238 !important;
+}
+.card-basura .card-sub {
+    color: #455a64 !important;
+}
+.card-basura .card-sub code {
+    background-color: #eceff1 !important;
+    color: #263238 !important;
+}
+.card-basura .card-contenedor {
+    background: #cfd8dc !important;
+    border-left: 4px solid #455a64 !important;
+    color: #263238 !important;
+}
+.card-basura .seccion-titulo {
+    color: #455a64 !important;
+}
+.card-basura .paso {
+    color: #263238 !important;
+}
+.card-basura .paso-num {
+    background: #455a64 !important;
+    color: #f5f5f5 !important;
+}
+.card-basura .error-item {
+    color: #c62828 !important;
+}
+.card-basura .impacto-box {
+    background: #eceff1 !important;
+    border: 1px solid #b0bec5 !important;
+    color: #455a64 !important;
+}
+
+/* Orgánico: Marrón claro / beige */
+.card-organico {
+    background: #efebe9 !important;
+    border: 2px solid #bcaaa4 !important;
+    color: #4e342e !important;
+}
+.card-organico .card-categoria {
+    color: #4e342e !important;
+}
+.card-organico .card-sub {
+    color: #6d4c41 !important;
+}
+.card-organico .card-sub code {
+    background-color: #d7ccc8 !important;
+    color: #4e342e !important;
+}
+.card-organico .card-contenedor {
+    background: #d7ccc8 !important;
+    border-left: 4px solid #6d4c41 !important;
+    color: #4e342e !important;
+}
+.card-organico .seccion-titulo {
+    color: #6d4c41 !important;
+}
+.card-organico .paso {
+    color: #4e342e !important;
+}
+.card-organico .paso-num {
+    background: #6d4c41 !important;
+    color: #efebe9 !important;
+}
+.card-organico .error-item {
+    color: #c62828 !important;
+}
+.card-organico .impacto-box {
+    background: #f5f5f5 !important;
+    border: 1px solid #bcaaa4 !important;
+    color: #6d4c41 !important;
+}
+
+/* Peligroso / Especial: Rojo claro / rosa pastel */
+.card-especial {
+    background: #ffebee !important;
+    border: 2px solid #ef9a9a !important;
+    color: #b71c1c !important;
+}
+.card-especial .card-categoria {
+    color: #b71c1c !important;
+}
+.card-especial .card-sub {
+    color: #c62828 !important;
+}
+.card-especial .card-sub code {
+    background-color: #ffcdd2 !important;
+    color: #b71c1c !important;
+}
+.card-especial .card-contenedor {
+    background: #ffcdd2 !important;
+    border-left: 4px solid #c62828 !important;
+    color: #b71c1c !important;
+}
+.card-especial .seccion-titulo {
+    color: #c62828 !important;
+}
+.card-especial .paso {
+    color: #b71c1c !important;
+}
+.card-especial .paso-num {
+    background: #c62828 !important;
+    color: #ffebee !important;
+}
+.card-especial .error-item {
+    color: #b71c1c !important;
+}
+.card-especial .impacto-box {
+    background: #ffcdd2 !important;
+    border: 1px solid #ef9a9a !important;
+    color: #c62828 !important;
+}
+.card-categoria {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+.card-sub {
+    color: #81c784;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+.card-contenedor {
+    background: #0d1f0d;
+    border-left: 3px solid #69f0ae;
+    padding: 0.6rem 1rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+.urgencia-alta {
+    background: #3e1a1a;
+    border: 1px solid #ef5350;
+    color: #ef9a9a;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.urgencia-media {
+    background: #3e2e1a;
+    border: 1px solid #ffa726;
+    color: #ffcc80;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.urgencia-baja {
+    background: #1a2e1a;
+    border: 1px solid #66bb6a;
+    color: #a5d6a7;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.paso {
+    display: flex;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+    align-items: flex-start;
+    font-size: 0.9rem;
+}
+.paso-num {
+    background: #69f0ae;
+    color: #0f1a0f;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.error-item {
+    color: #ef9a9a;
+    font-size: 0.88rem;
+    margin-bottom: 0.3rem;
+}
+.impacto-box {
+    background: #0d2218;
+    border: 1px solid #2e7d32;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    color: #a5d6a7;
+    font-size: 0.88rem;
+    margin-top: 1rem;
+    font-style: italic;
+}
+.seccion-titulo {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    color: #4caf50;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+}
+.punto-verde-card {
+    background: #1b2e1b;
+    border: 1px solid #2e4a2e;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+}
+.punto-verde-nombre {
+    font-weight: 600;
+    color: #69f0ae;
+    font-size: 0.95rem;
+}
+.punto-verde-dir {
+    color: #81c784;
+    font-size: 0.85rem;
+    margin-top: 0.2rem;
+}
+.punto-verde-dist {
+    color: #4caf50;
+    font-size: 0.82rem;
+    margin-top: 0.3rem;
+    font-family: 'Space Mono', monospace;
+}
+.disclaimer {
+    background: #1a1a0d;
+    border: 1px solid #827717;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    color: #fff176;
+    font-size: 0.82rem;
+    margin-top: 1.5rem;
+}
+/* Input */
+.stTextInput input {
+    background: #1b2e1b !important;
+    border: 1px solid #2e4a2e !important;
+    color: #e8f5e9 !important;
+    border-radius: 8px !important;
+    font-family: 'DM Sans', sans-serif !important;
+}
+.stTextInput input:focus {
+    border-color: #69f0ae !important;
+    box-shadow: 0 0 0 2px rgba(105,240,174,0.15) !important;
+}
+/* Botones */
+.stButton button {
+    background: #69f0ae !important;
+    color: #0f1a0f !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-family: 'DM Sans', sans-serif !important;
+    transition: all 0.2s !important;
+}
+.stButton button:hover {
+    background: #40c4a0 !important;
+    transform: translateY(-1px) !important;
+}
+/* File uploader */
+.stFileUploader {
+    background: #1b2e1b !important;
+    border: 1px dashed #2e4a2e !important;
+    border-radius: 8px !important;
+}
+/* Radio */
+.stRadio label {
+    color: #e8f5e9 !important;
+}
+/* Selectbox */
+.stSelectbox div {
+    background: #1b2e1b !important;
+    border-color: #2e4a2e !important;
+    color: #e8f5e9 !important;
+}
+/* Number input */
+.stNumberInput input {
+    background: #1b2e1b !important;
+    border-color: #2e4a2e !important;
+    color: #e8f5e9 !important;
+}
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    background: #1a2e1a;
+    border-radius: 8px;
+    padding: 4px;
+    gap: 4px;
+}
+.stTabs [data-baseweb="tab"] {
+    color: #81c784 !important;
+    border-radius: 6px !important;
+}
+.stTabs [aria-selected="true"] {
+    background: #69f0ae !important;
+    color: #0f1a0f !important;
+    font-weight: 600 !important;
+}
+
+/* Caja de razonamiento del motor de inferencia */
+.explicacion-box {
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin-bottom: 1.2rem;
+    margin-top: 0.5rem;
+    font-weight: 400;
+}
+
+/* Colores personalizados según el tipo de card */
+.card-reciclable .explicacion-box {
+    background: #c8e6c9 !important;
+    border: 1px solid #81c784 !important;
+    color: #1b5e20 !important;
+}
+
+.card-basura .explicacion-box {
+    background: #eceff1 !important;
+    border: 1px solid #b0bec5 !important;
+    color: #37474f !important;
+}
+
+.card-organico .explicacion-box {
+    background: #d7ccc8 !important;
+    border: 1px solid #bcaaa4 !important;
+    color: #4e342e !important;
+}
+
+.card-especial .explicacion-box {
+    background: #ffcdd2 !important;
+    border: 1px solid #ef9a9a !important;
+    color: #b71c1c !important;
+}
+
+/* Caja de estado del residuo */
+.estado-evaluado-box {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+    margin-top: 0.5rem;
+}
+.badge-estado {
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Colores de badges en tarjetas reciclables */
+.card-reciclable .badge-estado {
+    background-color: #c8e6c9 !important;
+    border: 1px solid #a5d6a7 !important;
+    color: #2e7d32 !important;
+}
+/* Colores de badges en tarjetas basura común */
+.card-basura .badge-estado {
+    background-color: #eceff1 !important;
+    border: 1px solid #cfd8dc !important;
+    color: #455a64 !important;
+}
+/* Colores de badges en tarjetas orgánicas */
+.card-organico .badge-estado {
+    background-color: #d7ccc8 !important;
+    border: 1px solid #bcaaa4 !important;
+    color: #6d4c41 !important;
+}
+/* Colores de badges en tarjetas especiales */
+.card-especial .badge-estado {
+    background-color: #ffcdd2 !important;
+    border: 1px solid #ef9a9a !important;
+    color: #c62828 !important;
+}

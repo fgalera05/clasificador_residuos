@@ -1,0 +1,243 @@
+tipo,keyword
+plastico_pet,botella de plastico
+plastico_pet,botella de gaseosa
+plastico_pet,botella de agua
+plastico_pet,botella de jugo
+plastico_pet,botella pet
+plastico_pet,bidon de plastico
+plastico_pet,envase de plastico
+plastico_pet,frasco de plastico
+plastico_pet,envase de yogur
+plastico_pet,pote de yogur
+plastico_pet,gaseosa
+plastico_pet,agua mineral
+plastico_bolsa,bolsa de plastico
+plastico_bolsa,bolsa nylon
+plastico_bolsa,bolsa de consorcio
+plastico_bolsa,bolsa de supermercado
+plastico_bolsa,film de plastico
+plastico_bolsa,papel film
+plastico_bolsa,film estirable
+plastico_bolsa,nylon
+plastico_bolsa,stretch
+plastico_decoracion,arbol de navidad
+plastico_decoracion,adorno navideno
+plastico_decoracion,guirnalda de plastico
+plastico_decoracion,decoracion plastica
+plastico_decoracion,juguete roto
+plastico_decoracion,juguete de plastico
+plastico_decoracion,silla de plastico
+plastico_decoracion,balde de plastico
+plastico_decoracion,palangana
+plastico_decoracion,percha de plastico
+plastico_decoracion,plastico duro
+telgopor,telgopor
+telgopor,poliestireno
+telgopor,espuma plastica
+telgopor,bandeja de carne
+telgopor,eps
+vidrio,botella de vidrio
+vidrio,frasco de vidrio
+vidrio,tarro de vidrio
+vidrio,botella de vino
+vidrio,botella de cerveza
+vidrio,conserva de vidrio
+vidrio,frasco de mermelada
+vidrio,frasco de salsa
+vidrio,recipiente de vidrio
+vidrio_no_reciclable,espejo
+vidrio_no_reciclable,vidrio de ventana
+vidrio_no_reciclable,vidrio de auto
+vidrio_no_reciclable,cristal de ventana
+vidrio_no_reciclable,ceramica
+vidrio_no_reciclable,porcelana
+vidrio_no_reciclable,taza rota
+vidrio_no_reciclable,plato roto
+papel,hoja de papel
+papel,papel de impresora
+papel,papel de diario
+papel,diario
+papel,periodico
+papel,revista
+papel,libro
+papel,cuaderno
+papel,fotocopia
+papel,impresion
+papel,hoja
+papel_higienico,papel higienico
+papel_higienico,papel de higiene
+papel_higienico,papel de cocina
+papel_higienico,papel absorbente
+papel_higienico,rollo de cocina
+papel_higienico,servilleta de papel
+papel_higienico,servilleta
+papel_higienico,panuelo de papel
+papel_higienico,panuelo descartable
+papel_higienico,tissue
+papel_no_reciclable,papel de caramelo
+papel_no_reciclable,papel metalizado
+papel_no_reciclable,papel de regalo brilloso
+papel_no_reciclable,papel manteca
+papel_no_reciclable,papel parafinado
+papel_no_reciclable,papel encerado
+papel_no_reciclable,papel plastificado
+papel_no_reciclable,papel fotografico
+papel_no_reciclable,papel foto
+papel_no_reciclable,papel carbon
+papel_no_reciclable,papel termico
+papel_no_reciclable,ticket
+papel_no_reciclable,factura termica
+carton,caja de carton
+carton,caja de pizza
+carton,caja de zapatos
+carton,carton corrugado
+carton,packaging de carton
+carton,caja de delivery
+carton,carton
+carton,caja
+tetrabrik,tetrabrik
+tetrabrik,tetra pak
+tetrabrik,caja de leche
+tetrabrik,caja de jugo
+tetrabrik,envase de leche
+tetrabrik,leche en caja
+tetrabrik,brick de leche
+metal_lata,lata de aluminio
+metal_lata,lata de cerveza
+metal_lata,lata de gaseosa
+metal_lata,lata de atun
+metal_lata,lata de tomate
+metal_lata,lata de conserva
+metal_lata,conserva metalica
+metal_lata,tapa metalica
+metal_lata,lata
+organico,resto de comida
+organico,sobra de comida
+organico,cascara de fruta
+organico,cascara de verdura
+organico,cascara
+organico,yerba mate
+organico,yerba usada
+organico,poso de cafe
+organico,cafe usado
+organico,comida en mal estado
+organico,fruta podrida
+organico,verdura podrida
+organico,pan viejo
+organico,pan duro
+organico,huevo
+organico,manzana
+organico,naranja
+organico,banana
+organico,platano
+organico,pera
+organico,uva
+organico,limon
+organico,mandarina
+organico,durazno
+organico,ciruela
+organico,sandia
+organico,melon
+organico,frutilla
+organico,kiwi
+organico,tomate
+organico,lechuga
+organico,zanahoria
+organico,cebolla
+organico,papa
+organico,batata
+organico,zapallo
+organico,berenjena
+organico,morron
+organico,apio
+organico,brocoli
+organico,coliflor
+organico,espinaca
+organico,acelga
+organico,pepino
+organico,choclo
+organico,ajo
+organico,puerro
+organico,remolacha
+organico,rabano
+organico,arveja
+organico,poroto
+organico,lenteja
+organico,garbanzo
+organico,arroz cocido
+organico,pasta cocida
+organico,fideos cocidos
+organico,noquis
+organico,carne
+organico,pollo
+organico,pescado
+organico,fiambre
+organico,embutido
+organico,queso
+organico,lacteo
+organico,yogur vencido
+organico,leche vencida
+organico,infusion
+organico,hoja de te
+organico,flor seca
+organico,planta seca
+organico,rama
+organico,hoja seca
+organico,pasto
+organico,cesped
+organico,jardin
+organico,flor
+organico,vegetal
+organico,vegetales
+organico,planta
+organico,restos organicos
+pila_bateria,pila aaa
+pila_bateria,pila aa
+pila_bateria,pila recargable
+pila_bateria,bateria de celular
+pila_bateria,bateria de auto
+pila_bateria,bateria de litio
+pila_bateria,pila alcalina
+pila_bateria,pila gastada
+pila_bateria,pila usada
+pila_bateria,bateria
+pila_bateria,pila
+medicamento,medicamento vencido
+medicamento,remedio vencido
+medicamento,pastilla vencida
+medicamento,comprimido vencido
+medicamento,jarabe vencido
+medicamento,antibiotico
+medicamento,analgesico
+medicamento,medicamento
+medicamento,remedio
+medicamento,pastilla
+medicamento,farmaco
+aceite_cocina,aceite de cocina
+aceite_cocina,aceite vegetal usado
+aceite_cocina,aceite de freir
+aceite_cocina,aceite usado
+aceite_cocina,aceite de girasol usado
+aceite_cocina,aceite de maiz usado
+electronico,celular roto
+electronico,celular viejo
+electronico,computadora vieja
+electronico,notebook vieja
+electronico,tablet rota
+electronico,televisor viejo
+electronico,tv roto
+electronico,cargador roto
+electronico,auricular roto
+electronico,router viejo
+electronico,impresora vieja
+electronico,electrodomestico
+electronico,celular
+electronico,computadora
+electronico,notebook
+electronico,tablet
+panal,panal descartable
+panal,panal usado
+panal,toalla femenina
+panal,absorbente femenino
+panal,aposito
+panal,panal

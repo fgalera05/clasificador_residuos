@@ -1,0 +1,20 @@
+termino,pregunta,opcion_num,tipo,descripcion
+botella,¿De qué material es la botella?,1,plastico_pet,Plástico (gaseosa / agua / jugo)
+botella,¿De qué material es la botella?,2,vidrio,Vidrio (vino / cerveza / conserva)
+botella,¿De qué material es la botella?,3,metal_lata,Metal / Aluminio
+frasco,¿De qué material es el frasco?,1,plastico_pet,Plástico
+frasco,¿De qué material es el frasco?,2,vidrio,Vidrio
+tarro,¿De qué material es el tarro?,1,vidrio,Vidrio (mermelada / conserva)
+tarro,¿De qué material es el tarro?,2,metal_lata,Metal (lata de pintura / conserva metálica)
+envase,¿De qué material es el envase?,1,plastico_pet,Plástico
+envase,¿De qué material es el envase?,2,vidrio,Vidrio
+envase,¿De qué material es el envase?,3,metal_lata,Metal
+envase,¿De qué material es el envase?,4,tetrabrik,Tetrabrik / Multicapa (leche / jugo)
+papel,¿Qué tipo de papel es?,1,papel,Papel blanco / Diario / Revista (reciclable)
+papel,¿Qué tipo de papel es?,2,papel_higienico,Papel higiénico / Servilleta / Tissue
+papel,¿Qué tipo de papel es?,3,papel_no_reciclable,Papel de caramelo / Manteca / Metalizado / Foto
+papel,¿Qué tipo de papel es?,4,carton,Cartón (caja / packaging)
+bolsa,¿De qué material es la bolsa?,1,plastico_bolsa,Plástico / Nylon
+bolsa,¿De qué material es la bolsa?,2,papel,Papel (bolsa de papel kraft)
+aceite,¿El aceite es nuevo (en envase) o ya fue usado?,1,plastico_pet,Envase de aceite nuevo (plástico)
+aceite,¿El aceite es nuevo (en envase) o ya fue usado?,2,aceite_cocina,Aceite de cocina ya usado
