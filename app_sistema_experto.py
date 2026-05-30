@@ -97,6 +97,7 @@ def renderizar_controles_estado(suffix: str):
     with col_e1:
         st.checkbox(
             "Está limpio 🧼",
+            value=st.session_state.get(f"estado_limpio_{suffix}", True),
             key=f"estado_limpio_{suffix}",
             on_change=sync_limpio_text if suffix == "text" else sync_limpio_img,
             help="El residuo no contiene restos de comida, grasa ni líquidos."
@@ -104,6 +105,7 @@ def renderizar_controles_estado(suffix: str):
     with col_e2:
         st.checkbox(
             "Está seco ☀️",
+            value=st.session_state.get(f"estado_seco_{suffix}", True),
             key=f"estado_seco_{suffix}",
             on_change=sync_seco_text if suffix == "text" else sync_seco_img,
             help="El residuo no está mojado, húmedo o empapado con líquidos."
@@ -111,6 +113,7 @@ def renderizar_controles_estado(suffix: str):
     with col_e3:
         st.checkbox(
             "Está roto/dañado 💥",
+            value=st.session_state.get(f"estado_roto_{suffix}", False),
             key=f"estado_roto_{suffix}",
             on_change=sync_roto_text if suffix == "text" else sync_roto_img,
             help="El residuo está quebrado, roto o deteriorado en su estructura física."
@@ -364,6 +367,30 @@ with tab2:
                     tipo = detectar_tipo(descripcion, KEYWORDS_DICT, AMBIGUOS_DICT)
                     if tipo.startswith("ambiguo:"):
                         st.info(f"Material ambiguo detectado: **{descripcion}**. Usá la pestaña de texto para aclarar.")
+                        termino = tipo.split(":")[1]
+                        info = AMBIGUOS_DICT[termino]
+
+                        st.warning(f"🤔 **\"{termino}\"** puede ser de distintos materiales.")
+                        st.markdown(f"**{info['pregunta']}**")
+
+                        opciones_labels = [desc for _, desc in info["opciones"].values()]
+                        opciones_tipos  = [t for t, _ in info["opciones"].values()]
+
+                        # Usamos un key único compuesto para evitar problemas de persistencia cruzada
+                        radio_key = f"radio_{termino}_{descripcion}"
+                        eleccion = st.radio(
+                            "Seleccioná una opción:",
+                            options=range(len(opciones_labels)),
+                            format_func=lambda i: opciones_labels[i],
+                            label_visibility="collapsed",
+                            key=radio_key
+                        )
+
+                        tipo_final = opciones_tipos[eleccion]
+                        # Mostrar controles justo antes de la card
+                        limpio, seco, roto = renderizar_controles_estado("img")
+                        regla = obtener_regla(tipo_final, ClasificadorDinamico, REGLAS_DICT, limpio=limpio, seco=seco, roto=roto)
+                        mostrar_resultado(regla, tipo_final, limpio=limpio, seco=seco, roto=roto)
                     else:
                         # Mostrar controles justo antes de la card
                         limpio, seco, roto = renderizar_controles_estado("img")

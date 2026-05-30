@@ -24,8 +24,18 @@ def analizar_imagen_con_gemini(image_bytes: bytes, mime_type: str, api_key: str)
         prompt,
         {"mime_type": mime_type, "data": image_bytes}
     ])
+    resultado = respuesta.text.strip()
 
-    return respuesta.text.strip()
+    # Imprimir en la terminal detalles completos del procesamiento
+    print("\n" + "="*50)
+    print("☁️ [GEMINI MODEL] PROCESAMIENTO DE IMAGEN")
+    print("• Dispositivo: Nube (API de Gemini)")
+    print("• Modelo: gemini-2.5-flash")
+    print(f"• Prompt original:\n  {prompt}")
+    print(f"• Texto reconocido:\n  >> {resultado} <<")
+    print("="*50 + "\n")
+
+    return resultado
 
 @st.cache_resource
 def _cargar_modelo_vision_local():
@@ -127,5 +137,16 @@ def analizar_imagen_local(image_bytes: bytes) -> str:
         skip_special_tokens=True,
         clean_up_tokenization_spaces=False
     )
+    resultado = output_text[0].strip()
     
-    return output_text[0].strip()
+    # Imprimir en la terminal detalles completos del procesamiento
+    print("\n" + "="*50)
+    print("🤖 [HF MODEL] PROCESAMIENTO DE IMAGEN")
+    print(f"• Dispositivo: {device}")
+    print("• Modelo: Qwen/Qwen2-VL-2B-Instruct")
+    print(f"• Prompt original:\n  {prompt}")
+    print(f"• Prompt formateado:\n  {text_prompt}")
+    print(f"• Texto reconocido:\n  >> {resultado} <<")
+    print("="*50 + "\n")
+    
+    return resultado

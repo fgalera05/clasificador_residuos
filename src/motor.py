@@ -82,8 +82,8 @@ class ClasificadorBase(KnowledgeEngine):
         detalle = " y ".join(estado_detalle)
         
         self.declare(Clasificado(
-            tipo='desconocido',
-            explicacion=f"Se reclasificó '{r['tipo']}' a 'no identificado/no apto' porque {detalle}. Los plásticos deben estar completamente limpios y secos para poder reciclarse. De lo contrario, deben desecharse como basura común."
+            tipo='reciclable_sucio',
+            explicacion=f"Se reclasificó '{r['tipo']}' a 'no apto (sucio/húmedo)' porque {detalle}. Los plásticos deben estar completamente limpios y secos para poder reciclarse. De lo contrario, deben desecharse como basura común."
         ))
 
     # Regla 5: Envase de tetrabrik sucio o húmedo
@@ -101,8 +101,8 @@ class ClasificadorBase(KnowledgeEngine):
         detalle = " y ".join(estado_detalle)
         
         self.declare(Clasificado(
-            tipo='desconocido',
-            explicacion=f"Se reclasificó 'tetrabrik' a 'no identificado/no apto' porque {detalle}. Los envases multicapa deben estar enjuagados y secos para evitar olores y bacterias en el circuito de reciclaje."
+            tipo='reciclable_sucio',
+            explicacion=f"Se reclasificó 'tetrabrik' a 'no apto (sucio/húmedo)' porque {detalle}. Los envases multicapa deben estar enjuagados y secos para evitar olores y bacterias en el circuito de reciclaje."
         ))
 
     # Regla 6: Latas de metal sucias
@@ -112,20 +112,43 @@ class ClasificadorBase(KnowledgeEngine):
     )
     def regla_metal_sucio(self, r):
         self.declare(Clasificado(
-            tipo='desconocido',
-            explicacion="Se reclasificó a 'no identificado/no apto' porque está sucio. Las latas de metal deben enjuagarse para eliminar restos orgánicos antes de descartarse en el contenedor de reciclables."
+            tipo='reciclable_sucio',
+            explicacion="Se reclasificó a 'no apto (sucio/húmedo)' porque está sucio. Las latas de metal deben enjuagarse para eliminar restos orgánicos antes de descartarse en el contenedor de reciclables."
         ))
 
-    # Regla 4: Caso por defecto (si no hay condiciones especiales de estado)
+    # Regla 4: Caso por defecto
     @Rule(
-        Residuo(tipo=MATCH.t),
+        AS.r << Residuo(tipo=MATCH.t),
         NOT(Clasificado()),
         salience=-10
     )
-    def regla_por_defecto(self, t):
+    def regla_por_defecto(self, r, t):
+        # Si el residuo es de tipo especial (peligroso, electrónico, etc.), se aclara que mantiene su canal especial.
+        es_especial = t in ['pila_bateria', 'medicamento', 'aceite_cocina', 'electronico']
+        estado_detalle = []
+        if not r.get('limpio', True):
+            estado_detalle.append("sucio")
+        if not r.get('seco', True):
+            estado_detalle.append("húmedo")
+        if r.get('roto', False):
+            estado_detalle.append("roto")
+
+        if es_especial:
+            if estado_detalle:
+                detalle = " e ".join(estado_detalle) if "sucio" in estado_detalle else " y ".join(estado_detalle)
+                explicacion = f"Aunque el residuo está {detalle}, mantiene su clasificación especial de '{t}' y debe ser descartado únicamente en su contenedor específico por su alta peligrosidad."
+            else:
+                explicacion = f"Se clasificó como '{t}'. Debe ser descartado en su punto de recolección especial."
+        else:
+            if estado_detalle:
+                detalle = " e ".join(estado_detalle) if "sucio" in estado_detalle else " y ".join(estado_detalle)
+                explicacion = f"Se clasificó directamente como '{t}' (el estado {detalle} no altera su circuito de descarte en este material)."
+            else:
+                explicacion = "Se clasificó directamente según el material identificado en la base de conocimientos."
+
         self.declare(Clasificado(
             tipo=t,
-            explicacion="Se clasificó directamente según el material identificado en la base de conocimientos."
+            explicacion=explicacion
         ))
 
 
@@ -179,21 +202,54 @@ def normalizar(texto: str) -> str:
 
 import re
 
+def pattern_para_palabra(word: str) -> str:
+    """
+    Retorna un patrón regex para una palabra que acepta tanto singular como plural en español.
+    """
+    if not word:
+        return ""
+    # Si termina en "ces", ej. "lapices" -> lapi(z|ces)
+    if word.endswith('ces'):
+        base = re.escape(word[:-3])
+        return rf'{base}(z|ces)'
+    # Si termina en "es" y la letra anterior es una consonante de plural común (l, r, n, d) -> ej. "papeles" -> papel(es)?
+    elif word.endswith('es') and len(word) > 2 and word[-3] in ('l', 'r', 'n', 'd'):
+        base = re.escape(word[:-2])
+        return rf'{base}(es)?'
+    # Si termina en "s" y la letra anterior es una vocal -> ej. "juguetes" -> juguete, "botellas" -> botella
+    elif word.endswith('s') and len(word) > 1 and word[-2] in ('a', 'e', 'i', 'o', 'u'):
+        base = re.escape(word[:-1])
+        return rf'{base}s?'
+    # Si es singular terminando en 'z' -> ej. "lapiz" -> lapi(z|ces)
+    elif word.endswith('z'):
+        base = re.escape(word[:-1])
+        return rf'{base}(z|ces)'
+    # Si es singular terminando en vocal -> ej. "juguete" -> juguetes?
+    elif word[-1] in ('a', 'e', 'i', 'o', 'u'):
+        return rf'{re.escape(word)}s?'
+    # Si es singular terminando en consonante común -> ej. "papel" -> papel(es)?
+    elif word[-1] in ('l', 'r', 'n', 'd'):
+        return rf'{re.escape(word)}(es)?'
+    else:
+        return re.escape(word)
+
 def coincide_keyword(kw: str, texto_normalizado: str) -> bool:
     """
     Verifica si una keyword coincide con el texto normalizado,
-    respetando límites de palabra e incluyendo plurales básicos en español.
+    respetando límites de palabra e incluyendo plurales y singulares
+    flexibles en español para cada palabra del término.
     """
     kw_norm = normalizar(kw)
     if not kw_norm:
         return False
-    kw_escaped = re.escape(kw_norm)
-    # Si la keyword termina en vocal, permitimos un plural con 's'
-    if kw_norm[-1] in ('a', 'e', 'i', 'o', 'u'):
-        pattern = rf'\b{kw_escaped}s?\b'
-    # Si termina en consonante, permitimos un plural con 'es'
-    else:
-        pattern = rf'\b{kw_escaped}(es)?\b'
+    
+    palabras = kw_norm.split()
+    patrones_palabras = [pattern_para_palabra(p) for p in palabras if p]
+    if not patrones_palabras:
+        return False
+    
+    # Unir las palabras con límites de palabra a los extremos y espacios intermedios
+    pattern = rf'\b' + r'\s+'.join(patrones_palabras) + rf'\b'
     return bool(re.search(pattern, texto_normalizado))
 
 

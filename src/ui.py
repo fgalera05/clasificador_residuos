@@ -55,11 +55,12 @@ def mostrar_resultado(regla: dict, tipo: str, limpio: bool = True, seco: bool = 
     if explicacion:
         explicacion_html = f'<div class="explicacion-box">🧠 <b>Razonamiento:</b> {explicacion}</div>'
 
-    # Mostrar la transición si el motor de inferencia reclasificó el residuo
     tipo_mostrado = tipo
     final_tipo = regla.get("_final_tipo", tipo)
+    transicion_html = ""
     if final_tipo != tipo:
         tipo_mostrado = f"{tipo} ➔ {final_tipo}"
+        transicion_html = f'<div style="color: #ff8a80; font-weight: bold; margin-top: 5px; font-size: 0.9rem;">⚠️ Reclasificado de <b>{tipo}</b> a <b>{final_tipo}</b> por su estado físico</div>'
 
     # Generar badges para el estado físico evaluado
     status_limpio = "🧼 Limpio" if limpio else "⚠️ Sucio/Grasoso"
@@ -75,6 +76,7 @@ def mostrar_resultado(regla: dict, tipo: str, limpio: bool = True, seco: bool = 
     st.markdown(f"""<div class="card-resultado {clase_card}">
 <div class="card-categoria">{regla.get('categoria', '—')}</div>
 <div class="card-sub">{regla.get('subcategoria', '—')} · tipo: <code>{tipo_mostrado}</code></div>
+{transicion_html}
 {estado_html}
 {explicacion_html}
 <div class="card-contenedor">🗑️ {regla.get('contenedor', '—')}</div>
