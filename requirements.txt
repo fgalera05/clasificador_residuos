@@ -6,3 +6,4 @@ torchvision
 transformers
 accelerate
 sentencepiece
+experta==1.9.4
