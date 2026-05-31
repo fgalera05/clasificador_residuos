@@ -1,17 +1,19 @@
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import streamlit as st
 import torch
 from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
 from PIL import Image
 import io
+import base64
+from huggingface_hub import InferenceClient
 
 def analizar_imagen_con_gemini(image_bytes: bytes, mime_type: str, api_key: str) -> str:
     """
     Configura Gemini y envía los bytes de la imagen con el prompt 
     para obtener una descripción corta en texto del residuo.
     """
-    genai.configure(api_key=api_key)
-    modelo = genai.GenerativeModel("gemini-2.5-flash")
+    client = genai.Client(api_key=api_key)
 
     prompt = (
         "Sos un asistente de clasificación de residuos para reciclaje en Argentina. "
@@ -20,10 +22,16 @@ def analizar_imagen_con_gemini(image_bytes: bytes, mime_type: str, api_key: str)
         "Respondé SOLO con la descripción, sin explicaciones adicionales."
     )
 
-    respuesta = modelo.generate_content([
-        prompt,
-        {"mime_type": mime_type, "data": image_bytes}
-    ])
+    respuesta = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=[
+            types.Part.from_bytes(
+                data=image_bytes,
+                mime_type=mime_type,
+            ),
+            prompt
+        ]
+    )
     resultado = respuesta.text.strip()
 
     # Imprimir en la terminal detalles completos del procesamiento
@@ -149,4 +157,71 @@ def analizar_imagen_local(image_bytes: bytes) -> str:
     print(f"• Texto reconocido:\n  >> {resultado} <<")
     print("="*50 + "\n")
     
+    return resultado
+
+def analizar_imagen_hf_api(image_bytes: bytes, hf_token: str = None) -> str:
+    # Intentamos obtener un token válido desde la UI o los secrets.
+    # Si viene vacío, usamos False para desactivar por completo la autenticación y forzar petición anónima.
+    token = hf_token if hf_token else st.secrets.get("HF_TOKEN")
+    if not token:
+        token = False
+
+    client = InferenceClient(
+        model="meta-llama/Llama-3.2-11B-Vision-Instruct",
+        token=token
+    )
+
+    base64_image = base64.b64encode(image_bytes).decode("utf-8")
+    
+    prompt = (
+        "Sos un asistente de clasificación de residuos para reciclaje en Argentina. "
+        "Analizá esta imagen y describí en UNA oración corta qué tipo de residuo es. "
+        "Sé específico con el material y el objeto. "
+        "Respondé SOLO con la descripción, sin explicaciones adicionales."
+    )
+
+    try:
+        respuesta = client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{base64_image}"
+                            }
+                        },
+                        {
+                            "type": "text",
+                            "text": prompt
+                        }
+                    ]
+                }
+            ],
+            max_tokens=50
+        )
+        resultado = respuesta.choices[0].message.content.strip()
+    except Exception as e:
+        error_msg = str(e)
+        if "401" in error_msg or "Unauthorized" in error_msg or "Invalid username or password" in error_msg:
+            raise ValueError(
+                "🔑 El Token de Hugging Face configurado es inválido o no tiene permisos. "
+                "Por favor, verificá que esté bien escrito o generá uno nuevo con permisos de lectura en huggingface.co/settings/tokens."
+            )
+        
+        print(f"Error con Llama-3.2-11B-Vision-Instruct: {e}. Intentando con Salesforce/blip-image-captioning...")
+        # Fallback a un modelo de image-to-text clásico
+        client.model = "Salesforce/blip-image-captioning"
+        respuesta = client.image_to_text(image_bytes)
+        resultado = respuesta.generated_text if hasattr(respuesta, 'generated_text') else str(respuesta)
+
+    # Imprimir en la terminal detalles completos del procesamiento
+    print("\n" + "="*50)
+    print("☁️ [HF API] PROCESAMIENTO DE IMAGEN")
+    print(f"• Modelo: {client.model}")
+    print(f"• Prompt original:\n  {prompt}")
+    print(f"• Texto reconocido:\n  >> {resultado} <<")
+    print("="*50 + "\n")
+
     return resultado
