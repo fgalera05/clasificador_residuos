@@ -63,6 +63,8 @@ streamlit run app_sistema_experto.py
 * [src/ui.py](./src/ui.py): Funciones auxiliares para renderizar las tarjetas y el diseño visual.
 * [src/style.css](./src/style.css): Hoja de estilos personalizada para dar una estética premium.
 * [data/](./data): Carpeta con los archivos de conocimiento (`reglas.csv`, `keywords.csv`, `ambiguos.csv`).
+* [Reciclaje/](./Reciclaje): Carpeta que contiene imágenes de prueba organizadas por tipo de residuo y contenedor para validar el funcionamiento del módulo de visión computacional.
+
 
 ---
 
