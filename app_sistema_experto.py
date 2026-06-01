@@ -1,5 +1,5 @@
 """
-♻️ Clasificador de Residuos para Reciclaje (Versión 2 - Inferencia Real)
+♻️ Clasificador de Residuos para Reciclaje
 Sistema Experto — Análisis de Datos II
 """
 
@@ -16,7 +16,7 @@ from src.vision import analizar_imagen_con_gemini
 
 # ── Configuración de página ───────────────────────────────────────────────────
 st.set_page_config(
-    page_title="♻️ Clasificador de Residuos (v2)",
+    page_title=" Clasificador de Residuos",
     page_icon="♻️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -127,12 +127,18 @@ def renderizar_controles_estado(suffix: str):
 
 with st.sidebar:
     st.markdown("""
-    <div style="padding: 1rem 0;">
-        <div style="font-family:'Space Mono',monospace; font-size:1.1rem; color:#69f0ae; font-weight:700;">
-            ♻️ Clasificador v2
+    <div style="padding: 0.5rem 0;">
+        <div style="font-family:'Space Mono',monospace; font-size:1.6rem; color:#81c784; font-weight:700; text-align:center">
+            Sistema Experto
         </div>
-        <div style="font-size:0.8rem; color:#81c784; margin-top:4px;">
-            Sistema Experto · Análisis de Datos II
+        <div style="font-size:1.2rem; color:#88bda3; margin-top:4px; text-align:center">
+                <div>Análisis de Datos II  · GRUPO A </div></br>
+                <div>Luciano Asís</div>
+                <div>Gustavo Barrajón</div>
+                <div>Fernando Galera</div>
+                <div>Gabrial García</div>
+                <div>Facundo Martínez</div>
+                <div>Andrea Moreno</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -155,7 +161,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("""
-    <div style="font-size:0.75rem; color:#4caf50; line-height:1.6;">
+    <div style="font-size:1.1rem; color:#88bda3; line-height:1.6;">
         <b>Motores:</b><br>
         • experta (KnowledgeEngine)<br>
         • Forward Chaining + State Rules<br>
@@ -175,14 +181,14 @@ with st.sidebar:
 
 st.markdown("""
 <div style="padding: 1.5rem 0 1rem 0;">
-    <div class="titulo-principal">Clasificador de<br>Residuos ♻️</div>
+    <div class="titulo-principal">Clasificador de Residuos ♻️</div>
     <div class="subtitulo">Sistema Experto basado en reglas · Análisis de Datos II</div>
 </div>
 """, unsafe_allow_html=True)
 
 # Los controles de estado físico ahora se muestran dentro de cada pestaña, directamente antes de la card.
 
-tab1, tab2, tab3 = st.tabs(["📝 Por texto", "📷 Por imagen", "📍 Puntos Verdes"])
+tab1, tab2, tab3 = st.tabs(["📝  Por texto", "📷  Por imagen", "📍  Puntos Verdes"])
 
 
 # ── TAB 1: Clasificación por texto ────────────────────────────────────────────

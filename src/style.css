@@ -19,18 +19,21 @@ section[data-testid="stSidebar"] {
 /* Título principal */
 .titulo-principal {
     font-family: 'Space Mono', monospace;
-    font-size: 2.4rem;
+    font-size: 2.8rem;
     font-weight: 700;
-    color: #69f0ae;
+    color: #88bda3;
     letter-spacing: -1px;
     margin-bottom: 0;
     line-height: 1.1;
+    text-align: center;
 }
 .subtitulo {
-    font-size: 1rem;
+    font-size: 1.5rem;
     color: #81c784;
-    margin-top: 4px;
+    margin-top: 16px;
+    padding: 0.5rem;
     font-weight: 300;
+    text-align: center;
 }
 
 /* Cards de resultado */
@@ -205,18 +208,18 @@ section[data-testid="stSidebar"] {
 }
 .card-categoria {
     font-family: 'Space Mono', monospace;
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     font-weight: 700;
     margin-bottom: 0.3rem;
 }
 .card-sub {
     color: #81c784;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-bottom: 1rem;
 }
 .card-contenedor {
     background: #0d1f0d;
-    border-left: 3px solid #69f0ae;
+    border-left: 3px solid #88bda3;
     padding: 0.6rem 1rem;
     border-radius: 0 8px 8px 0;
     margin-bottom: 1rem;
@@ -263,7 +266,7 @@ section[data-testid="stSidebar"] {
     font-size: 0.9rem;
 }
 .paso-num {
-    background: #69f0ae;
+    background: #88bda3;
     color: #0f1a0f;
     border-radius: 50%;
     width: 22px;
@@ -293,7 +296,7 @@ section[data-testid="stSidebar"] {
 }
 .seccion-titulo {
     font-family: 'Space Mono', monospace;
-    font-size: 0.75rem;
+    font-size: 1.3rem;
     color: #4caf50;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -309,7 +312,7 @@ section[data-testid="stSidebar"] {
 }
 .punto-verde-nombre {
     font-weight: 600;
-    color: #69f0ae;
+    color: #88bda3;
     font-size: 0.95rem;
 }
 .punto-verde-dir {
@@ -329,8 +332,10 @@ section[data-testid="stSidebar"] {
     border-radius: 8px;
     padding: 0.7rem 1rem;
     color: #fff176;
-    font-size: 0.82rem;
+    font-size: 1rem;
     margin-top: 1.5rem;
+    text-align: center;
+    width: 96%;
 }
 /* Input */
 .stTextInput input {
@@ -346,13 +351,14 @@ section[data-testid="stSidebar"] {
 }
 /* Botones */
 .stButton button {
-    background: #69f0ae !important;
+    background: #88bda3 !important;
     color: #0f1a0f !important;
     border: none !important;
     border-radius: 8px !important;
-    font-weight: 600 !important;
+    font-weight: 900 !important;
     font-family: 'DM Sans', sans-serif !important;
-    transition: all 0.2s !important;
+    font-size: 1rem !important;
+    transition: all 0.5s !important;
 }
 .stButton button:hover {
     background: #40c4a0 !important;
@@ -381,20 +387,49 @@ section[data-testid="stSidebar"] {
     color: #e8f5e9 !important;
 }
 /* Tabs */
+
 .stTabs [data-baseweb="tab-list"] {
     background: #1a2e1a;
     border-radius: 8px;
     padding: 4px;
     gap: 4px;
+    width: 100% !important;
 }
 .stTabs [data-baseweb="tab"] {
     color: #81c784 !important;
     border-radius: 6px !important;
+    flex: 1 !important;
 }
 .stTabs [aria-selected="true"] {
-    background: #69f0ae !important;
+    background: #88bda3 !important;
     color: #0f1a0f !important;
     font-weight: 600 !important;
+}
+
+[data-baseweb="tab"] *, 
+[data-testid="stTextInput"] *,
+[data-testid="stNumberInput"] *, 
+[data-testid="stSelectbox"] *,
+[data-testid="stCheckbox"] *,
+[data-testid="stRadio"] *, 
+[data-testid="stButton"] * {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+}
+
+[data-testid="stAlert"],
+[data-testid="stWarningContainer"] {
+    background-color: #d8ca9b !important;
+    border-radius: 12px !important;
+}
+
+[data-testid="stAlert"] *,
+[data-testid="stWarningContainer"] * {
+    text-align: center !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    color: #8a1414 !important;
 }
 
 /* Caja de razonamiento del motor de inferencia */
