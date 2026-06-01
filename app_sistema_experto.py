@@ -495,7 +495,7 @@ with tab3:
                 "nombre"   : p["nombre"],
                 "tipo"     : p.get("tipo", "—"),
                 "direccion": p["direccion"],
-                "distancia": f"{p['dist_km']} km",
+                "distancia": f"{int(p['dist_km']*1000)} metros",
                 "color"    : _COLOR_TIPO_RGB.get(p.get("tipo", ""), [128, 128, 128, 200]),
                 "radio_px" : _RADIO_TIPO.get(p.get("tipo", ""), _RADIO_TIPO["default"]),
             }
@@ -557,7 +557,7 @@ with tab3:
                 </div>
                 <div style="font-size:0.78rem;color:#555;margin-bottom:2px;">{tipo_label}</div>
                 <div class="punto-verde-dir">📍 {p['direccion']}</div>
-                <div class="punto-verde-dist">🚶 {p['dist_km']} km de distancia</div>
+                <div class="punto-verde-dist">🚶 {int(p['dist_km']*1000)} metros de distancia</div>
             </div>
             """, unsafe_allow_html=True)
     elif puntos is not None:
