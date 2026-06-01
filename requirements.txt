@@ -2,3 +2,5 @@ streamlit>=1.32.0
 pandas>=2.0.0
 google-genai
 experta>=1.9.4
+streamlit-geolocation
+streamlit-js-eval

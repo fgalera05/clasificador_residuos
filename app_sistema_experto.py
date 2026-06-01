@@ -5,6 +5,7 @@ Sistema Experto — Análisis de Datos II
 
 import streamlit as st
 import pandas as pd
+from streamlit_js_eval import get_geolocation
 
 # Importamos los módulos locales
 from src.data import cargar_sistema, cargar_puntos_verdes
@@ -385,47 +386,181 @@ with tab2:
 
 
 # ── TAB 3: Puntos Verdes ──────────────────────────────────────────────────────
+_COLOR_TIPO = {
+    "Con Atención"              : "#f5c800",
+    "Centro de Clasificación RSU": "#1464c8",
+    "Contenedor Verde"           : "#22a83a",
+    "Contenedor Negro"           : "#555555",
+}
+# Colores RGB para pydeck [R, G, B, A]
+_COLOR_TIPO_RGB = {
+    "Con Atención"              : [245, 200,   0, 230],
+    "Centro de Clasificación RSU": [ 30, 100, 200, 230],
+    "Contenedor Verde"           : [ 34, 168,  58, 230],
+    "Contenedor Negro"           : [ 85,  85,  85, 200],
+}
+_COLOR_USUARIO_RGB = [220, 50, 50, 255]
+_RADIO_TIPO = {          # metros en pydeck, controlado con radius_min/max_pixels
+    "Contenedor Verde": 8,
+    "default"         : 5,
+}
+_LEYENDA_HTML = """
+<div style="display:flex;gap:20px;font-size:0.82rem;margin-top:4px;flex-wrap:wrap;">
+  <span><span style="display:inline-block;width:11px;height:11px;background:#f5c800;border-radius:50%;margin-right:4px;"></span>Con Atención</span>
+  <span><span style="display:inline-block;width:11px;height:11px;background:#1464c8;border-radius:50%;margin-right:4px;"></span>Centro de Clasificación RSU</span>
+  <span><span style="display:inline-block;width:11px;height:11px;background:#22a83a;border-radius:50%;margin-right:4px;"></span>Contenedor Verde</span>
+  <span><span style="display:inline-block;width:11px;height:11px;background:#555555;border-radius:50%;margin-right:4px;"></span>Contenedor Negro</span>
+  <span><span style="display:inline-block;width:11px;height:11px;background:#e63215;border-radius:50%;margin-right:4px;"></span>Tu ubicación</span>
+</div>
+"""
+
 with tab3:
-    st.markdown("#### Puntos Verdes más cercanos")
-    st.markdown("Ingresá tu ubicación para encontrar los centros de reciclaje más cercanos.")
+    st.markdown("#### Puntos Verdes")
 
-    col_lat, col_lon, col_n = st.columns([2, 2, 1])
+    # Inicializar session state
+    for k, v in [("tab3_lat", -34.6083), ("tab3_lon", -58.3712),
+                 ("tab3_modo", None), ("tab3_puntos", None),
+                 ("tab3_busq_lat", -34.6083), ("tab3_busq_lon", -58.3712),
+                 ("tab3_geo_lat_proc", None), ("tab3_geo_lon_proc", None)]:
+        if k not in st.session_state:
+            st.session_state[k] = v
 
-    # Valores por defecto: Plaza de Mayo, CABA
-    with col_lat:
-        lat = st.number_input("Latitud", value=-34.6083, format="%.4f", step=0.0001)
-    with col_lon:
-        lon = st.number_input("Longitud", value=-58.3712, format="%.4f", step=0.0001)
-    with col_n:
-        n_puntos = st.number_input("Cantidad", min_value=1, max_value=10, value=3)
+    def _buscar(lat, lon):
+        st.session_state["tab3_puntos"]   = puntos_cercanos(lat, lon, DF_PUNTOS_VERDES, radio_km=0.3)
+        st.session_state["tab3_busq_lat"] = lat
+        st.session_state["tab3_busq_lon"] = lon
 
-    st.caption("💡 Podés obtener tus coordenadas haciendo clic derecho en Google Maps → \"¿Qué hay aquí?\"")
+    # Dos botones de modo
+    col_b1, col_b2 = st.columns(2)
+    with col_b1:
+        if st.button("📍 Usar mi ubicación", use_container_width=True):
+            st.session_state["tab3_modo"] = "geo"
+    with col_b2:
+        if st.button("✏️ Ingresar dirección", use_container_width=True):
+            st.session_state["tab3_modo"] = "dir"
 
-    if st.button("🔍 Buscar Puntos Verdes", use_container_width=True):
-        with st.spinner("Buscando..."):
-            puntos = puntos_cercanos(lat, lon, DF_PUNTOS_VERDES, n=n_puntos)
+    modo = st.session_state["tab3_modo"]
 
-        if puntos:
-            st.markdown(f"**{len(puntos)} Puntos Verdes más cercanos:**")
+    # Modo geolocalización: dispara el diálogo del navegador sin UI propia
+    if modo == "geo":
+        loc = get_geolocation()
+        if loc and loc.get("coords"):
+            g_lat = loc["coords"]["latitude"]
+            g_lon = loc["coords"]["longitude"]
+            if g_lat != st.session_state["tab3_geo_lat_proc"] or \
+               g_lon != st.session_state["tab3_geo_lon_proc"]:
+                st.session_state["tab3_lat"] = g_lat
+                st.session_state["tab3_lon"] = g_lon
+                st.session_state["tab3_geo_lat_proc"] = g_lat
+                st.session_state["tab3_geo_lon_proc"] = g_lon
+                _buscar(g_lat, g_lon)
 
-            for p in puntos:
-                st.markdown(f"""
-                <div class="punto-verde-card">
-                    <div class="punto-verde-nombre">📌 {p['nombre']}</div>
-                    <div class="punto-verde-dir">📍 {p['direccion']}</div>
-                    <div class="punto-verde-dist">🚶 {p['dist_km']} km de distancia</div>
+    # Modo dirección: campo + un solo botón 🔍
+    elif modo == "dir":
+        with st.form("form_geocode", border=False):
+            addr = st.text_input("", placeholder="Ej: Av. Corrientes 1234, Buenos Aires",
+                                 label_visibility="collapsed")
+            if st.form_submit_button("🔍 Buscar", use_container_width=True) and addr.strip():
+                try:
+                    import requests as _req
+                    res = _req.get(
+                        "https://nominatim.openstreetmap.org/search",
+                        params={"q": addr, "format": "json", "limit": 1,
+                                "countrycodes": "ar", "addressdetails": 0},
+                        headers={"User-Agent": "clasificador-residuos-caba/1.0"},
+                        timeout=5,
+                    ).json()
+                    if res:
+                        lat, lon = float(res[0]["lat"]), float(res[0]["lon"])
+                        st.session_state["tab3_lat"] = lat
+                        st.session_state["tab3_lon"] = lon
+                        _buscar(lat, lon)
+                    else:
+                        st.warning("No se encontró la dirección.")
+                except Exception:
+                    st.error("Error al geocodificar. Verificá tu conexión.")
+
+    puntos   = st.session_state.get("tab3_puntos")
+    busq_lat = st.session_state["tab3_busq_lat"]
+    busq_lon = st.session_state["tab3_busq_lon"]
+
+    if puntos:
+        import pydeck as pdk
+
+        # Capa de puntos cercanos
+        puntos_data = [
+            {
+                "lon"      : p["lon"],
+                "lat"      : p["lat"],
+                "nombre"   : p["nombre"],
+                "tipo"     : p.get("tipo", "—"),
+                "direccion": p["direccion"],
+                "distancia": f"{p['dist_km']} km",
+                "color"    : _COLOR_TIPO_RGB.get(p.get("tipo", ""), [128, 128, 128, 200]),
+                "radio_px" : _RADIO_TIPO.get(p.get("tipo", ""), _RADIO_TIPO["default"]),
+            }
+            for p in puntos
+        ]
+        # Capa usuario
+        usuario_data = [{
+            "lon": busq_lon, "lat": busq_lat,
+            "nombre": "Tu ubicación", "tipo": "", "direccion": "", "distancia": "",
+            "color": _COLOR_USUARIO_RGB, "radio_px": 10,
+        }]
+
+        # Capas separadas por tamaño de punto
+        datos_pequeños = [p for p in puntos_data if p["tipo"] != "Contenedor Verde"]
+        datos_verdes   = [p for p in puntos_data if p["tipo"] == "Contenedor Verde"]
+
+        capas = []
+        if datos_pequeños:
+            capas.append(pdk.Layer(
+                "ScatterplotLayer", datos_pequeños,
+                get_position=["lon", "lat"], get_fill_color="color",
+                get_radius=10, radius_min_pixels=4, radius_max_pixels=4,
+                pickable=True,
+            ))
+        if datos_verdes:
+            capas.append(pdk.Layer(
+                "ScatterplotLayer", datos_verdes,
+                get_position=["lon", "lat"], get_fill_color="color",
+                get_radius=10, radius_min_pixels=8, radius_max_pixels=8,
+                pickable=True,
+            ))
+        capa_usuario = pdk.Layer(
+            "ScatterplotLayer", usuario_data,
+            get_position=["lon", "lat"], get_fill_color="color",
+            get_radius=10, radius_min_pixels=10, radius_max_pixels=10,
+            pickable=True,
+        )
+        capas.append(capa_usuario)
+
+        vista = pdk.ViewState(latitude=busq_lat, longitude=busq_lon, zoom=16)
+        deck  = pdk.Deck(
+            layers=capas,
+            initial_view_state=vista,
+            map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+            tooltip={"html": "<b>{nombre}</b><br/>{tipo}<br/>{direccion}<br/>{distancia}"},
+        )
+        st.pydeck_chart(deck)
+        st.markdown(_LEYENDA_HTML, unsafe_allow_html=True)
+
+        st.markdown(f"**{len(puntos)} puntos en 300 m:**")
+        for p in puntos:
+            tipo_label = p.get("tipo", "—")
+            color_dot  = _COLOR_TIPO.get(tipo_label, "#808080")
+            st.markdown(f"""
+            <div class="punto-verde-card">
+                <div class="punto-verde-nombre">
+                    <span style="display:inline-block;width:10px;height:10px;background:{color_dot};border-radius:50%;margin-right:6px;"></span>
+                    {p['nombre']}
                 </div>
-                """, unsafe_allow_html=True)
+                <div style="font-size:0.78rem;color:#555;margin-bottom:2px;">{tipo_label}</div>
+                <div class="punto-verde-dir">📍 {p['direccion']}</div>
+                <div class="punto-verde-dist">🚶 {p['dist_km']} km de distancia</div>
+            </div>
+            """, unsafe_allow_html=True)
+    elif puntos is not None:
+        st.warning("No se encontraron puntos en un radio de 300 m.")
 
-            # Mapa con los puntos
-            mapa_data = pd.DataFrame({
-                "lat": [p["lat"] for p in puntos] + [lat],
-                "lon": [p["lon"] for p in puntos] + [lon],
-            })
-            st.map(mapa_data, zoom=13)
-
-        else:
-            st.error("No se pudieron obtener los Puntos Verdes. Verificá tu conexión.")
-
-    st.markdown("---")
     st.caption("Datos: [Portal de Datos Abiertos de CABA](https://data.buenosaires.gob.ar/dataset/puntos-verdes)")

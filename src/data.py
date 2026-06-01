@@ -1,6 +1,9 @@
 import os
+import re
 import pandas as pd
 import streamlit as st
+
+_POINT_RE = re.compile(r"POINT\s*\(\s*([+-]?\d+\.?\d*)\s+([+-]?\d+\.?\d*)\s*\)")
 
 # Ruta a la carpeta data, ubicada en la raíz del proyecto (un nivel arriba de src/)
 DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
@@ -44,16 +47,22 @@ def cargar_sistema():
 
 @st.cache_data
 def cargar_puntos_verdes():
-    """Intenta cargar el dataset de Puntos Verdes de CABA."""
-    URL = "https://cdn.buenosaires.gob.ar/datosabiertos/datasets/ministerio-de-espacio-publico-e-higiene-urbana/puntos-verdes/puntos-verdes.csv"
+    """Carga el dataset de Puntos Verdes desde el archivo local."""
+    local = os.path.join(DATA_PATH, "puntos_verdes.csv")
     try:
-        df = pd.read_csv(URL, encoding="utf-8")
-        return df
+        df = pd.read_csv(local, encoding="utf-8")
     except Exception:
-        # Fallback con datos de ejemplo
-        return pd.DataFrame({
-            "nombre": ["Punto Verde Palermo", "Punto Verde Recoleta", "Punto Verde Caballito", "Punto Verde Almagro", "Punto Verde San Telmo"],
-            "direccion": ["Av. Santa Fe 3200", "Av. Las Heras 1900", "Av. Rivadavia 5000", "Av. Corrientes 3800", "Defensa 400"],
-            "lat": [-34.5876, -34.5795, -34.6188, -34.6078, -34.6218],
-            "long": [-58.4193, -58.3942, -58.4380, -58.4120, -58.3712],
-        })
+        return None
+
+    # Parsear columna geometry (WKT "POINT (lon lat)") → lat / lon
+    has_lat = any("lat" in c.lower() for c in df.columns)
+    has_lon = any(x in c.lower() for c in df.columns for x in ("lon", "lng", "long"))
+    if (not has_lat or not has_lon) and "geometry" in df.columns:
+        def _parse(s):
+            m = _POINT_RE.search(str(s))
+            return (float(m.group(2)), float(m.group(1))) if m else (None, None)
+        parsed = df["geometry"].apply(_parse)
+        df["lat"] = [p[0] for p in parsed]
+        df["lon"] = [p[1] for p in parsed]
+
+    return df
