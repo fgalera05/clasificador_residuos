@@ -32,6 +32,10 @@ class ClasificadorBase(KnowledgeEngine):
     """
 
     # Regla 1: Papel o cartón que esté sucio o húmedo
+    # El uso de AS.r permite vincular (binding) el hecho que disparó la regla
+    # con la variable 'r' en el cuerpo del método, una técnica esencial para
+    # acceder a los atributos del hecho durante la ejecución del RHS.
+    # El operador '|' modela disyunción lógica en las condiciones del LHS
     @Rule(
         AS.r << Residuo(tipo='papel', limpio=False) |
         AS.r << Residuo(tipo='papel', seco=False) |
@@ -117,6 +121,17 @@ class ClasificadorBase(KnowledgeEngine):
         ))
 
     # Regla 4: Caso por defecto
+    # Esta regla implementa el patrón "default reasoning" de los sistemas
+    # expertos: si ninguna otra regla modificó la clasificación del residuo
+    # se asume que el tipo detectado es directamente válido como clasificación final.
+    #
+    # El uso de NOT() corresponde a Negation as Failure (NAF)se interpreta como 
+    # evidencia de su falsedad bajo el supuesto de mundo cerrado (Closed World Assumption).
+    #
+    # MATCH.t captura el valor del atributo 'tipo' y lo inyecta en el RHS (acción),
+    # permitiendo que una sola regla genérica opere sobre cualquier tipo
+    # de residuo no cubierto por las reglas específicas anteriores.
+
     @Rule(
         AS.r << Residuo(tipo=MATCH.t),
         NOT(Clasificado()),
@@ -158,6 +173,11 @@ def crear_metodo_regla(tipo: str, datos: dict):
     """
     Genera un método de regla experta para un tipo de residuo,
     evaluando ahora sobre el hecho intermedio Clasificado.
+
+    Genera en tiempo de ejecución un método decorado con @Rule para un tipo
+    de residuo específico leído desde el CSV (se carga desde una fuente estructurada externa
+    en lugar de ser codificado manualmente).
+ 
     """
     def metodo(self, _datos=datos):
         self.declare(Clasificacion(
@@ -194,6 +214,11 @@ def construir_motor(reglas_dict: dict):
 
 
 def normalizar(texto: str) -> str:
+    """
+    Normaliza el texto de entrada eliminando acentos y convirtiendo a minúsculas.
+    En sistemas expertos que procesan lenguaje natural, esta normalización forma
+    parte del subsistema de adquisición de datos.
+    """
     texto = texto.lower().strip()
     for src, dst in [("á","a"),("é","e"),("í","i"),("ó","o"),("ú","u"),
                      ("à","a"),("è","e"),("ì","i"),("ò","o"),("ù","u"),
