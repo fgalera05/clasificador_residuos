@@ -178,13 +178,6 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    # Métricas que muestran el tamaño actual de la base de conocimiento cargada
-    st.markdown("**📊 Base de conocimiento**")
-    st.metric("Tipos de residuos", len(REGLAS_DICT))
-    st.metric("Keywords activas", sum(len(v) for v in KEYWORDS_DICT.values()))
-    st.metric("Términos ambiguos", len(AMBIGUOS_DICT))
-
-    st.markdown("---")
     st.markdown("**🔧 Configuración**")
 
     # Campo de texto enmascarado para ingresar la API Key de Gemini.
@@ -195,6 +188,13 @@ with st.sidebar:
         placeholder="Para clasificación por imagen",
         help="Obtené tu key gratis en aistudio.google.com"
     )
+
+    st.markdown("---")
+    # Métricas que muestran el tamaño actual de la base de conocimiento cargada
+    st.markdown("**📊 Base de conocimiento**")
+    st.metric("Tipos de residuos", len(REGLAS_DICT))
+    st.metric("Keywords activas", sum(len(v) for v in KEYWORDS_DICT.values()))
+    st.metric("Términos ambiguos", len(AMBIGUOS_DICT))
 
     st.markdown("---")
     # Información estática sobre los motores y fuentes de datos utilizados
