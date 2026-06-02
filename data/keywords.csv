@@ -195,7 +195,6 @@ pila_bateria,pila aaa
 pila_bateria,pila aa
 pila_bateria,pila recargable
 pila_bateria,bateria de celular
-pila_bateria,bateria de auto
 pila_bateria,bateria de litio
 pila_bateria,pila alcalina
 pila_bateria,pila gastada
@@ -237,10 +236,132 @@ electronico,notebook
 electronico,tablet
 electronico,juguete electronico
 electronico,juguete electrico
-electrico, consola de video juegos
+electronico,consola de videojuegos
+electronico,cartucho de tinta
+electronico,cartucho de toner
+electronico,cartucho de impresora
+electronico,cartucho
+electronico,raee
+electronico,residuo electronico
+electronico,aparato electronico
+electronico,aparato electrico
 panal,panal descartable
 panal,panal usado
 panal,toalla femenina
 panal,absorbente femenino
 panal,aposito
 panal,panal
+ropa_textil,ropa usada
+ropa_textil,ropa vieja
+ropa_textil,ropa en mal estado
+ropa_textil,prenda de ropa
+ropa_textil,ropa de cama usada
+ropa_textil,zapatillas usadas
+ropa_textil,zapatos usados
+ropa_textil,calzado usado
+ropa_textil,mochila vieja
+ropa_textil,cartera vieja
+ropa_textil,bolso viejo
+ropa_textil,tela usada
+ropa_textil,cortina vieja
+ropa_textil,alfombra vieja
+ropa_textil,campera vieja
+ropa_textil,remera vieja
+ropa_textil,pantalon viejo
+ropa_textil,ropa
+ropa_textil,zapatilla
+ropa_textil,zapato
+ropa_textil,calzado
+ropa_textil,trapo
+ropa_textil,sabana
+madera,tabla de madera
+madera,palo de madera
+madera,mueble viejo
+madera,silla de madera
+madera,mesa de madera
+madera,caja de madera
+madera,cajon de madera
+madera,tarima de madera
+madera,palet de madera
+madera,paleta de madera
+madera,listones de madera
+madera,madera
+aceite_motor,aceite de motor
+aceite_motor,aceite de auto
+aceite_motor,aceite lubricante
+aceite_motor,aceite de vehiculo
+aceite_motor,aceite mineral
+aceite_motor,lubricante de motor
+aceite_motor,aceite de caja
+aceite_motor,aceite de transmision
+bombilla,lampara de bajo consumo
+bombilla,lampara fluorescente
+bombilla,tubo fluorescente
+bombilla,lampara ahorradora
+bombilla,lamparita fundida
+bombilla,bombillo
+bombilla,ampolleta
+bombilla,lampara rota
+bombilla,lamparita
+pintura_solvente,pintura al agua
+pintura_solvente,esmalte sintetico
+pintura_solvente,pintura de obra
+pintura_solvente,pintura sobrante
+pintura_solvente,lata de pintura
+pintura_solvente,aguarras
+pintura_solvente,disolvente
+pintura_solvente,diluyente
+pintura_solvente,thinner
+pintura_solvente,barniz
+pintura_solvente,solvente
+pintura_solvente,acetona
+pintura_solvente,latex
+pintura_solvente,pintura
+aerosol,desodorante aerosol
+aerosol,pintura en aerosol
+aerosol,repelente en aerosol
+aerosol,insecticida aerosol
+aerosol,desodorante en spray
+aerosol,fijador en spray
+aerosol,laca en aerosol
+aerosol,spray
+aerosol,aerosol
+neumatico,cubierta de auto
+neumatico,cubierta usada
+neumatico,neumatico usado
+neumatico,goma de auto
+neumatico,goma de bicicleta
+neumatico,camara de aire
+neumatico,rueda de goma
+neumatico,llanta
+neumatico,neumatico
+bateria_auto,bateria de auto
+bateria_auto,bateria de moto
+bateria_auto,bateria de vehiculo
+bateria_auto,bateria de plomo
+bateria_auto,acumulador de auto
+bateria_auto,bateria de ups
+bombilla_led,lampara led
+bombilla_led,lamparita led
+bombilla_led,foco led
+bombilla_led,tira led
+bombilla_led,lampara de led
+plastico_pvc,cano de pvc
+plastico_pvc,caneria de pvc
+plastico_pvc,tubo de pvc
+plastico_pvc,manguera de pvc
+plastico_pvc,vinilo pvc
+plastico_pvc,envase pvc
+plastico_pvc,pvc
+escombros,escombro
+escombros,cascote
+escombros,ladrillo roto
+escombros,cemento de obra
+escombros,yeso de obra
+escombros,ceramica de bano rota
+escombros,baldosa rota
+escombros,residuo de construccion
+escombros,material de demolicion
+escombros,residuos de obra
+escombros,material de construccion
+escombros,escombros

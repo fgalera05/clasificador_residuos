@@ -1,6 +1,48 @@
 import os
 import streamlit as st
 
+# Mapping de tipo de residuo → clave de filtro del mapa (pestaña 3)
+_TIPO_A_FILTRO_MAPA = {
+    # Reciclables → contenedor verde
+    "plastico_pet":        "contenedor_verde",
+    "plastico_bolsa":      "contenedor_verde",
+    "plastico_decoracion": "contenedor_verde",
+    "vidrio":              "contenedor_verde",
+    "papel":               "contenedor_verde",
+    "carton":              "contenedor_verde",
+    "tetrabrik":           "contenedor_verde",
+    "metal_lata":          "contenedor_verde",
+    "aerosol":             "contenedor_verde",
+    "reciclable_sucio":    "contenedor_verde",
+    # Especiales → punto verde con atención
+    "pila_bateria":        "con_atencion",
+    "bateria_auto":        "con_atencion",
+    "medicamento":         "con_atencion",
+    "aceite_cocina":       "con_atencion",
+    "aceite_motor":        "con_atencion",
+    "electronico":         "con_atencion",
+    "bombilla":            "con_atencion",
+    "bombilla_led":        "con_atencion",
+    "pintura_solvente":    "con_atencion",
+    "ropa_textil":         "con_atencion",
+    "plastico_pvc":        "con_atencion",
+    "organico":            "con_atencion",
+    # Basura común → contenedor negro
+    "telgopor":             "contenedor_negro",
+    "papel_higienico":      "contenedor_negro",
+    "papel_no_reciclable":  "contenedor_negro",
+    "panal":                "contenedor_negro",
+    "vidrio_no_reciclable": "contenedor_negro",
+    "desconocido":          "contenedor_negro",
+    # escombros, madera, neumatico → sin mapa específico (recolección municipal)
+}
+_FILTRO_LABEL_MAPA = {
+    "contenedor_verde": "Contenedores Verdes (reciclables)",
+    "con_atencion":     "Puntos Verdes con Atención",
+    "rsu":              "Centros de Clasificación RSU",
+    "contenedor_negro": "Contenedores Negros",
+}
+
 def inyectar_estilos():
     """Lee el archivo style.css de la misma carpeta e inyecta los estilos en Streamlit."""
     css_path = os.path.join(os.path.dirname(__file__), "style.css")
@@ -91,3 +133,16 @@ def mostrar_resultado(regla: dict, tipo: str, limpio: bool = True, seco: bool = 
     st.markdown("""<div class="disclaimer">
 ⚠️ Este sistema es orientativo y educativo. Para dudas específicas consultá en tu municipio o Punto Verde más cercano.
 </div>""", unsafe_allow_html=True)
+
+    # Link a la pestaña del mapa con filtro pre-aplicado
+    _tipo_final = regla.get("_final_tipo", tipo)
+    _filtro = _TIPO_A_FILTRO_MAPA.get(_tipo_final)
+    if _filtro:
+        _flabel = _FILTRO_LABEL_MAPA.get(_filtro, "el mapa")
+        st.markdown(
+            f'<a href="?tipos={_filtro}" style="display:inline-flex;align-items:center;gap:6px;'
+            f'background:#1a3a2a;color:#81c784;border:1px solid #2d5a3d;padding:8px 16px;'
+            f'border-radius:8px;text-decoration:none;font-size:0.88rem;margin-top:8px;">'
+            f'📍 Ver {_flabel} en el mapa →</a>',
+            unsafe_allow_html=True,
+        )

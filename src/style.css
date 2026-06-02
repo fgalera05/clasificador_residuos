@@ -511,3 +511,14 @@ section[data-testid="stSidebar"] {
     border: 1px solid #ef9a9a !important;
     color: #c62828 !important;
 }
+
+/* Reemplazar "Press Enter to submit form" por texto en español */
+[data-testid="InputInstructions"] > span {
+    display: none;
+}
+[data-testid="InputInstructions"]::after {
+    content: "↵ Presioná Enter para buscar";
+    font-size: 0.75rem;
+    color: #81c784;
+    opacity: 0.75;
+}

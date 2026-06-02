@@ -124,7 +124,9 @@ class ClasificadorBase(KnowledgeEngine):
     )
     def regla_por_defecto(self, r, t):
         # Si el residuo es de tipo especial (peligroso, electrónico, etc.), se aclara que mantiene su canal especial.
-        es_especial = t in ['pila_bateria', 'medicamento', 'aceite_cocina', 'electronico']
+        es_especial = t in ['pila_bateria', 'bateria_auto', 'medicamento', 'aceite_cocina',
+                            'aceite_motor', 'electronico', 'bombilla', 'bombilla_led',
+                            'pintura_solvente', 'plastico_pvc']
         estado_detalle = []
         if not r.get('limpio', True):
             estado_detalle.append("sucio")

@@ -18,3 +18,15 @@ bolsa,¿De qué material es la bolsa?,1,plastico_bolsa,Plástico / Nylon
 bolsa,¿De qué material es la bolsa?,2,papel,Papel (bolsa de papel kraft)
 aceite,¿El aceite es nuevo (en envase) o ya fue usado?,1,plastico_pet,Envase de aceite nuevo (plástico)
 aceite,¿El aceite es nuevo (en envase) o ya fue usado?,2,aceite_cocina,Aceite de cocina ya usado
+lampara,¿Qué tipo de lámpara es?,1,bombilla,Fluorescente / CFL / Bajo consumo (tubo espiral o recto — puede contener mercurio)
+lampara,¿Qué tipo de lámpara es?,2,bombilla_led,LED (luz fría o cálida sin tubo espiral — NO contiene mercurio)
+lampara,¿Qué tipo de lámpara es?,3,electronico,Halógena / Proyector / Otro tipo electrónico
+plastico,¿Qué tipo de plástico es? (buscá el número en el símbolo de reciclaje),1,plastico_pet,Botella o envase flexible (gaseosa / agua / yogur — código 01 PET)
+plastico,¿Qué tipo de plástico es? (buscá el número en el símbolo de reciclaje),2,plastico_bolsa,Bolsa / film / nylon / stretch (código 04 LDPE)
+plastico,¿Qué tipo de plástico es? (buscá el número en el símbolo de reciclaje),3,plastico_decoracion,Rígido o duro (bidón / silla / juguete / tapa — código 02 HDPE o 05 PP)
+plastico,¿Qué tipo de plástico es? (buscá el número en el símbolo de reciclaje),4,plastico_pvc,Caño / manguera / vinilo / lona plástica (código 03 PVC — NO va al contenedor verde)
+plastico,¿Qué tipo de plástico es? (buscá el número en el símbolo de reciclaje),5,telgopor,Telgopor o espuma plástica (código 06 EPS)
+vidrio,¿Qué tipo de vidrio es?,1,vidrio,Botella o frasco entero (reciclable — contenedor verde)
+vidrio,¿Qué tipo de vidrio es?,2,vidrio_no_reciclable,Espejo / ventana / cerámica / porcelana (no reciclable — basura común)
+metal,¿Qué tipo de metal es?,1,metal_lata,Lata de aluminio o acero (bebida / conserva / aerosol vacío)
+metal,¿Qué tipo de metal es?,2,electronico,Cable / accesorio eléctrico o electrónico (RAEE)

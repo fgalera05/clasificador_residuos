@@ -190,6 +190,17 @@ st.markdown("""
 
 tab1, tab2, tab3 = st.tabs(["📝  Por texto", "📷  Por imagen", "📍  Puntos Verdes"])
 
+# Auto-navegar a pestaña 3 cuando la URL tiene ?tipos=... (una vez por valor de param)
+_url_tipos_param = st.query_params.get("tipos", "")
+if _url_tipos_param and not st.session_state.get(f"_tab3_auto_{_url_tipos_param}"):
+    st.session_state[f"_tab3_auto_{_url_tipos_param}"] = True
+    import streamlit.components.v1 as _stc_v1
+    _stc_v1.html(
+        """<script>(function(){function _go(){var t=window.parent.document.querySelectorAll('button[role="tab"]');
+        for(var i=0;i<t.length;i++){if(t[i].textContent.indexOf('Puntos')>-1){t[i].click();return;}}}
+        setTimeout(_go,500);setTimeout(_go,1100);})();</script>""",
+        height=0,
+    )
 
 # ── TAB 1: Clasificación por texto ────────────────────────────────────────────
 with tab1:
@@ -391,182 +402,333 @@ with tab2:
 
 
 
-# ── TAB 3: Puntos Verdes ──────────────────────────────────────────────────────
+# ── TAB 3: Mapa de Puntos y Contenedores ─────────────────────────────────────
 _COLOR_TIPO = {
-    "Con Atención"              : "#f5c800",
+    "Con Atención"               : "#f5c800",
     "Centro de Clasificación RSU": "#1464c8",
-    "Contenedor Verde"           : "#22a83a",
-    "Contenedor Negro"           : "#555555",
+    "Contenedor Verde"            : "#22a83a",
+    "Contenedor Negro"            : "#555555",
 }
-# Colores RGB para pydeck [R, G, B, A]
 _COLOR_TIPO_RGB = {
-    "Con Atención"              : [245, 200,   0, 230],
+    "Con Atención"               : [245, 200,   0, 230],
     "Centro de Clasificación RSU": [ 30, 100, 200, 230],
-    "Contenedor Verde"           : [ 34, 168,  58, 230],
-    "Contenedor Negro"           : [ 85,  85,  85, 200],
+    "Contenedor Verde"            : [ 34, 168,  58, 230],
+    "Contenedor Negro"            : [ 85,  85,  85, 200],
 }
 _COLOR_USUARIO_RGB = [220, 50, 50, 255]
-_RADIO_TIPO = {          # metros en pydeck, controlado con radius_min/max_pixels
-    "Contenedor Verde": 8,
-    "default"         : 5,
+_RADIO_TIPO = {"Contenedor Verde": 8, "default": 5}
+
+# Mapeos para filtros de pestaña 3
+_FILTRO_A_TIPO = {
+    "con_atencion":     "Con Atención",
+    "contenedor_verde": "Contenedor Verde",
+    "rsu":              "Centro de Clasificación RSU",
+    "contenedor_negro": "Contenedor Negro",
 }
-_LEYENDA_HTML = """
-<div style="display:flex;gap:20px;font-size:0.82rem;margin-top:4px;flex-wrap:wrap;">
-  <span><span style="display:inline-block;width:11px;height:11px;background:#f5c800;border-radius:50%;margin-right:4px;"></span>Con Atención</span>
-  <span><span style="display:inline-block;width:11px;height:11px;background:#1464c8;border-radius:50%;margin-right:4px;"></span>Centro de Clasificación RSU</span>
-  <span><span style="display:inline-block;width:11px;height:11px;background:#22a83a;border-radius:50%;margin-right:4px;"></span>Contenedor Verde</span>
-  <span><span style="display:inline-block;width:11px;height:11px;background:#555555;border-radius:50%;margin-right:4px;"></span>Contenedor Negro</span>
-  <span><span style="display:inline-block;width:11px;height:11px;background:#e63215;border-radius:50%;margin-right:4px;"></span>Tu ubicación</span>
-</div>
-"""
+_FILTRO_LABELS_TAB3 = {
+    "con_atencion":     ("Con Atención",                 "#f5c800"),
+    "contenedor_verde": ("Contenedor Verde",              "#22a83a"),
+    "rsu":              ("Centro de Clasificación RSU",   "#1464c8"),
+    "contenedor_negro": ("Contenedor Negro",              "#555555"),
+}
+# Horarios y materiales por defecto cuando el CSV no tiene datos
+_HORARIO_DEFAULT = {
+    "Contenedor Verde":            "Sin restricción horaria · disponible 24 hs",
+    "Contenedor Negro":            "Recomendado: depositar entre 19 y 21 hs (días de recolección)",
+    "Centro de Clasificación RSU": "Consultar con el centro",
+    "Con Atención":                "",
+}
+_MATERIALES_DEFAULT = {
+    "Contenedor Verde":            "Papel · Cartón · Plástico · Metal · Vidrio · Tetrabrik",
+    "Contenedor Negro":            "Residuos no reciclables",
+    "Centro de Clasificación RSU": "Materiales reciclables separados por tipo",
+    "Con Atención":                "",
+}
 
 with tab3:
-    st.markdown("#### Puntos Verdes")
 
-    # Inicializar session state
-    for k, v in [("tab3_lat", -34.6083), ("tab3_lon", -58.3712),
-                 ("tab3_modo", None), ("tab3_puntos", None),
-                 ("tab3_busq_lat", -34.6083), ("tab3_busq_lon", -58.3712),
-                 ("tab3_geo_lat_proc", None), ("tab3_geo_lon_proc", None)]:
-        if k not in st.session_state:
-            st.session_state[k] = v
+    # ── Leer parámetro de URL y configurar filtros ────────────────────────────
+    _tipos_param_t3 = st.query_params.get("tipos", "")
+    _tipos_url_t3   = [t.strip() for t in _tipos_param_t3.split(",")
+                       if t.strip() in _FILTRO_LABELS_TAB3] if _tipos_param_t3 else []
+    _default_sel    = _tipos_url_t3 if _tipos_url_t3 else list(_FILTRO_LABELS_TAB3.keys())
+
+    # ── Checkboxes de filtro ──────────────────────────────────────────────────
+    st.markdown("**🔽 Filtrar por tipo de punto:**")
+    _fcols = st.columns(4)
+    _tipos_sel_t3 = []
+    for _fi, (_fk, (_flbl, _fcol)) in enumerate(_FILTRO_LABELS_TAB3.items()):
+        with _fcols[_fi]:
+            if st.checkbox(
+                _flbl,
+                value=(_fk in _default_sel),
+                key=f"filtro_t3_{_fk}",
+            ):
+                _tipos_sel_t3.append(_fk)
+
+    # ── Título dinámico ───────────────────────────────────────────────────────
+    _all_filtro_keys = set(_FILTRO_LABELS_TAB3.keys())
+    if not _tipos_sel_t3 or set(_tipos_sel_t3) == _all_filtro_keys:
+        _titulo_t3 = "Puntos y Contenedores en CABA"
+    elif len(_tipos_sel_t3) == 1:
+        _titulo_t3 = f"Ubicación de {_FILTRO_LABELS_TAB3[_tipos_sel_t3[0]][0]} en CABA"
+    else:
+        _labs_t3 = [_FILTRO_LABELS_TAB3[t][0] for t in _tipos_sel_t3]
+        _titulo_t3 = "Ubicación de " + ", ".join(_labs_t3[:-1]) + f" y {_labs_t3[-1]} en CABA"
+
+    st.markdown(f"#### {_titulo_t3}")
+
+    # ── Inicializar session state ─────────────────────────────────────────────
+    for _k, _v in [("tab3_lat", -34.6083), ("tab3_lon", -58.3712),
+                   ("tab3_modo", None), ("tab3_puntos", None),
+                   ("tab3_busq_lat", -34.6083), ("tab3_busq_lon", -58.3712),
+                   ("tab3_geo_lat_proc", None), ("tab3_geo_lon_proc", None)]:
+        if _k not in st.session_state:
+            st.session_state[_k] = _v
 
     def _buscar(lat, lon):
-        st.session_state["tab3_puntos"]   = puntos_cercanos(lat, lon, DF_PUNTOS_VERDES, radio_km=0.3)
-        st.session_state["tab3_busq_lat"] = lat
-        st.session_state["tab3_busq_lon"] = lon
+        # Pasar los tipos activos para que el radio se expanda hacia esos tipos
+        _tipos_busq = [_FILTRO_A_TIPO[k] for k in _tipos_sel_t3] if _tipos_sel_t3 else None
+        st.session_state["tab3_puntos"]      = puntos_cercanos(lat, lon, DF_PUNTOS_VERDES,
+                                                               radio_km=0.3, minimo=2,
+                                                               tipos=_tipos_busq)
+        st.session_state["tab3_busq_lat"]    = lat
+        st.session_state["tab3_busq_lon"]    = lon
+        st.session_state["tab3_tipos_busq"]  = frozenset(_tipos_busq) if _tipos_busq else None
 
-    # Dos botones de modo
-    col_b1, col_b2 = st.columns(2)
-    with col_b1:
+    def _cargar_todos():
+        if DF_PUNTOS_VERDES is None or DF_PUNTOS_VERDES.empty:
+            return
+        # Construir lista completa sin filtro de distancia (cacheada en session_state)
+        if "tab3_todos_cache" not in st.session_state:
+            _df = DF_PUNTOS_VERDES.dropna(subset=["lat", "lon"])
+            st.session_state["tab3_todos_cache"] = [
+                {
+                    "nombre"    : str(r.get("nombre", "—")),
+                    "tipo"      : str(r.get("tipo", "—")),
+                    "direccion" : str(r.get("direccion", "—")),
+                    "dist_km"   : 0.0,
+                    "lat"       : float(r["lat"]),
+                    "lon"       : float(r["lon"]),
+                    "horario"   : str(r["horario"])    if pd.notna(r.get("horario", ""))    else "",
+                    "materiales": str(r["materiales"]) if pd.notna(r.get("materiales", "")) else "",
+                }
+                for r in _df.to_dict("records")
+            ]
+        st.session_state["tab3_puntos"]   = st.session_state["tab3_todos_cache"]
+        st.session_state["tab3_busq_lat"] = -34.6083
+        st.session_state["tab3_busq_lon"] = -58.3712
+        st.session_state["tab3_modo"]     = "todos"
+
+    # ── Botones de modo ───────────────────────────────────────────────────────
+    _col_b1, _col_b2, _col_b3 = st.columns(3)
+    with _col_b1:
         if st.button("📍 Usar mi ubicación", use_container_width=True):
             st.session_state["tab3_modo"] = "geo"
-    with col_b2:
+    with _col_b2:
         if st.button("✏️ Ingresar dirección", use_container_width=True):
             st.session_state["tab3_modo"] = "dir"
+    with _col_b3:
+        if st.button("🗺️ Ver todos", use_container_width=True):
+            _cargar_todos()
 
-    modo = st.session_state["tab3_modo"]
+    _modo = st.session_state["tab3_modo"]
 
-    # Modo geolocalización: dispara el diálogo del navegador sin UI propia
-    if modo == "geo":
-        loc = get_geolocation()
-        if loc and loc.get("coords"):
-            g_lat = loc["coords"]["latitude"]
-            g_lon = loc["coords"]["longitude"]
-            if g_lat != st.session_state["tab3_geo_lat_proc"] or \
-               g_lon != st.session_state["tab3_geo_lon_proc"]:
-                st.session_state["tab3_lat"] = g_lat
-                st.session_state["tab3_lon"] = g_lon
-                st.session_state["tab3_geo_lat_proc"] = g_lat
-                st.session_state["tab3_geo_lon_proc"] = g_lon
-                _buscar(g_lat, g_lon)
+    if _modo == "geo":
+        _loc = get_geolocation()
+        if _loc and _loc.get("coords"):
+            _g_lat = _loc["coords"]["latitude"]
+            _g_lon = _loc["coords"]["longitude"]
+            if _g_lat != st.session_state["tab3_geo_lat_proc"] or \
+               _g_lon != st.session_state["tab3_geo_lon_proc"]:
+                st.session_state["tab3_lat"] = _g_lat
+                st.session_state["tab3_lon"] = _g_lon
+                st.session_state["tab3_geo_lat_proc"] = _g_lat
+                st.session_state["tab3_geo_lon_proc"] = _g_lon
+                _buscar(_g_lat, _g_lon)
 
-    # Modo dirección: campo + un solo botón 🔍
-    elif modo == "dir":
+    elif _modo == "dir":
         with st.form("form_geocode", border=False):
-            addr = st.text_input("", placeholder="Ej: Av. Corrientes 1234, Buenos Aires",
-                                 label_visibility="collapsed")
-            if st.form_submit_button("🔍 Buscar", use_container_width=True) and addr.strip():
+            _addr = st.text_input("", placeholder="Ej: Av. Corrientes 1234, Buenos Aires",
+                                  label_visibility="collapsed")
+            if st.form_submit_button("🔍 Buscar", use_container_width=True) and _addr.strip():
                 try:
                     import requests as _req
-                    res = _req.get(
+                    _res = _req.get(
                         "https://nominatim.openstreetmap.org/search",
-                        params={"q": addr, "format": "json", "limit": 1,
+                        params={"q": _addr, "format": "json", "limit": 1,
                                 "countrycodes": "ar", "addressdetails": 0},
                         headers={"User-Agent": "clasificador-residuos-caba/1.0"},
                         timeout=5,
                     ).json()
-                    if res:
-                        lat, lon = float(res[0]["lat"]), float(res[0]["lon"])
-                        st.session_state["tab3_lat"] = lat
-                        st.session_state["tab3_lon"] = lon
-                        _buscar(lat, lon)
+                    if _res:
+                        _lat2, _lon2 = float(_res[0]["lat"]), float(_res[0]["lon"])
+                        st.session_state["tab3_lat"] = _lat2
+                        st.session_state["tab3_lon"] = _lon2
+                        _buscar(_lat2, _lon2)
                     else:
                         st.warning("No se encontró la dirección.")
                 except Exception:
                     st.error("Error al geocodificar. Verificá tu conexión.")
 
-    puntos   = st.session_state.get("tab3_puntos")
-    busq_lat = st.session_state["tab3_busq_lat"]
-    busq_lon = st.session_state["tab3_busq_lon"]
+    _puntos   = st.session_state.get("tab3_puntos")
+    _busq_lat = st.session_state["tab3_busq_lat"]
+    _busq_lon = st.session_state["tab3_busq_lon"]
 
-    if puntos:
+    if _puntos:
         import pydeck as pdk
 
-        # Capa de puntos cercanos
-        puntos_data = [
-            {
-                "lon"      : p["lon"],
-                "lat"      : p["lat"],
-                "nombre"   : p["nombre"],
-                "tipo"     : p.get("tipo", "—"),
-                "direccion": p["direccion"],
-                "distancia": f"{int(p['dist_km']*1000)} metros",
-                "color"    : _COLOR_TIPO_RGB.get(p.get("tipo", ""), [128, 128, 128, 200]),
-                "radio_px" : _RADIO_TIPO.get(p.get("tipo", ""), _RADIO_TIPO["default"]),
-            }
-            for p in puntos
-        ]
-        # Capa usuario
-        usuario_data = [{
-            "lon": busq_lon, "lat": busq_lat,
-            "nombre": "Tu ubicación", "tipo": "", "direccion": "", "distancia": "",
-            "color": _COLOR_USUARIO_RGB, "radio_px": 10,
-        }]
+        # Filtrar por tipos seleccionados
+        _tipos_csv_sel = {_FILTRO_A_TIPO[k] for k in _tipos_sel_t3} \
+                         if _tipos_sel_t3 else set(_FILTRO_A_TIPO.values())
+        _puntos_fil = [p for p in _puntos if p.get("tipo", "") in _tipos_csv_sel]
 
-        # Capas separadas por tamaño de punto
-        datos_pequeños = [p for p in puntos_data if p["tipo"] != "Contenedor Verde"]
-        datos_verdes   = [p for p in puntos_data if p["tipo"] == "Contenedor Verde"]
+        # Fallback: si el filtro cambió después de la búsqueda y no hay resultados,
+        # hacer una búsqueda ampliada para los tipos pedidos (cacheada en session_state)
+        if not _puntos_fil and not _es_todos and _tipos_csv_sel and _busq_lat != -34.6083:
+            _ck = "_fb_" + "_".join(sorted(_tipos_csv_sel)) + f"_{_busq_lat:.5f}_{_busq_lon:.5f}"
+            if _ck not in st.session_state:
+                st.session_state[_ck] = puntos_cercanos(
+                    _busq_lat, _busq_lon, DF_PUNTOS_VERDES,
+                    radio_km=0.3, minimo=2, tipos=list(_tipos_csv_sel),
+                )
+            _puntos_fil = st.session_state[_ck]
 
-        capas = []
-        if datos_pequeños:
-            capas.append(pdk.Layer(
-                "ScatterplotLayer", datos_pequeños,
+        # Preparar datos completando horario/materiales con defaults por tipo
+        _puntos_data = []
+        for _p in _puntos_fil:
+            _tp  = _p.get("tipo", "")
+            _hor = _p.get("horario", "")    or _HORARIO_DEFAULT.get(_tp, "")
+            _mat = _p.get("materiales", "") or _MATERIALES_DEFAULT.get(_tp, "")
+            _puntos_data.append({
+                "lon":        _p["lon"],
+                "lat":        _p["lat"],
+                "nombre":     _p["nombre"],
+                "tipo":       _tp,
+                "direccion":  _p["direccion"],
+                "distancia":  f"{int(_p['dist_km']*1000)} metros",
+                "horario":    _hor,
+                "materiales": _mat,
+                "color":      _COLOR_TIPO_RGB.get(_tp, [128, 128, 128, 200]),
+                "radio_px":   _RADIO_TIPO.get(_tp, _RADIO_TIPO["default"]),
+            })
+
+        _modo_actual = st.session_state.get("tab3_modo")
+        _es_todos    = _modo_actual == "todos"
+
+        _datos_peq  = [p for p in _puntos_data if p["tipo"] != "Contenedor Verde"]
+        _datos_verd = [p for p in _puntos_data if p["tipo"] == "Contenedor Verde"]
+
+        _capas = []
+        if _datos_peq:
+            _capas.append(pdk.Layer(
+                "ScatterplotLayer", _datos_peq,
                 get_position=["lon", "lat"], get_fill_color="color",
                 get_radius=10, radius_min_pixels=4, radius_max_pixels=4,
                 pickable=True,
             ))
-        if datos_verdes:
-            capas.append(pdk.Layer(
-                "ScatterplotLayer", datos_verdes,
+        if _datos_verd:
+            _capas.append(pdk.Layer(
+                "ScatterplotLayer", _datos_verd,
                 get_position=["lon", "lat"], get_fill_color="color",
                 get_radius=10, radius_min_pixels=8, radius_max_pixels=8,
                 pickable=True,
             ))
-        capa_usuario = pdk.Layer(
-            "ScatterplotLayer", usuario_data,
-            get_position=["lon", "lat"], get_fill_color="color",
-            get_radius=10, radius_min_pixels=10, radius_max_pixels=10,
-            pickable=True,
-        )
-        capas.append(capa_usuario)
+        if not _es_todos:
+            _capas.append(pdk.Layer(
+                "ScatterplotLayer",
+                [{"lon": _busq_lon, "lat": _busq_lat, "nombre": "Tu ubicación",
+                  "tipo": "", "direccion": "", "distancia": "", "horario": "",
+                  "materiales": "", "color": _COLOR_USUARIO_RGB, "radio_px": 10}],
+                get_position=["lon", "lat"], get_fill_color="color",
+                get_radius=10, radius_min_pixels=10, radius_max_pixels=10,
+                pickable=True,
+            ))
 
-        vista = pdk.ViewState(latitude=busq_lat, longitude=busq_lon, zoom=16)
-        deck  = pdk.Deck(
-            layers=capas,
-            initial_view_state=vista,
+        if _es_todos:
+            _view_lat, _view_lon, _zoom = _busq_lat, _busq_lon, 12
+        elif _puntos_fil:
+            # Centrar entre ubicación del usuario y centroide de puntos visibles
+            _avg_lat = sum(p["lat"] for p in _puntos_fil) / len(_puntos_fil)
+            _avg_lon = sum(p["lon"] for p in _puntos_fil) / len(_puntos_fil)
+            _view_lat = (_busq_lat + _avg_lat) / 2
+            _view_lon = (_busq_lon + _avg_lon) / 2
+            # Zoom según el punto filtrado más lejano (con margen)
+            _max_dist_km = max(p["dist_km"] for p in _puntos_fil)
+            if   _max_dist_km < 0.15: _zoom = 16
+            elif _max_dist_km < 0.35: _zoom = 15
+            elif _max_dist_km < 0.70: _zoom = 14
+            elif _max_dist_km < 1.50: _zoom = 13
+            elif _max_dist_km < 3.00: _zoom = 12
+            elif _max_dist_km < 6.00: _zoom = 11
+            else:                      _zoom = 10
+        else:
+            _view_lat, _view_lon, _zoom = _busq_lat, _busq_lon, 16
+        _vista = pdk.ViewState(latitude=_view_lat, longitude=_view_lon, zoom=_zoom)
+        _deck  = pdk.Deck(
+            layers=_capas,
+            initial_view_state=_vista,
             map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
-            tooltip={"html": "<b>{nombre}</b><br/>{tipo}<br/>{direccion}<br/>{distancia}"},
+            tooltip={"html": (
+                "<b>{nombre}</b><br/>"
+                "<span style='color:#aaa;font-size:0.85em'>{tipo}</span><br/>"
+                "📍 {direccion}<br/>"
+                "🚶 {distancia}<br/>"
+                "🕐 {horario}<br/>"
+                "♻️ {materiales}"
+            )},
         )
-        st.pydeck_chart(deck)
-        st.markdown(_LEYENDA_HTML, unsafe_allow_html=True)
+        st.pydeck_chart(_deck)
 
-        st.markdown(f"**{len(puntos)} puntos en 300 m:**")
-        for p in puntos:
-            tipo_label = p.get("tipo", "—")
-            color_dot  = _COLOR_TIPO.get(tipo_label, "#808080")
+        # Leyenda dinámica según filtros activos
+        _leyenda_html = '<div style="display:flex;gap:20px;font-size:0.82rem;margin-top:4px;flex-wrap:wrap;">'
+        for _fk, (_flbl, _fcol) in _FILTRO_LABELS_TAB3.items():
+            if not _tipos_sel_t3 or _fk in _tipos_sel_t3:
+                _leyenda_html += (
+                    f'<span><span style="display:inline-block;width:11px;height:11px;'
+                    f'background:{_fcol};border-radius:50%;margin-right:4px;"></span>'
+                    f'{_flbl}</span>'
+                )
+        _leyenda_html += (
+            '<span><span style="display:inline-block;width:11px;height:11px;'
+            'background:#e63215;border-radius:50%;margin-right:4px;"></span>Tu ubicación</span>'
+            '</div>'
+        )
+        st.markdown(_leyenda_html, unsafe_allow_html=True)
+
+        if _es_todos:
+            st.markdown(f"**{len(_puntos_fil)} puntos en CABA** ({_titulo_t3})")
+            if len(_puntos_fil) > 50:
+                st.caption(f"Lista omitida por cantidad — usá el mapa para explorar.")
+                _puntos_fil = []   # no renderizar cards
+        else:
+            _radio_real = int(max(p["dist_km"] for p in _puntos_fil) * 1000) if _puntos_fil else 0
+            _radio_txt  = f"{_radio_real} m" if _radio_real <= 300 else f"~{_radio_real} m (radio ampliado)"
+            st.markdown(f"**{len(_puntos_fil)} puntos** en {_radio_txt} ({_titulo_t3}):")
+        for _p in _puntos_fil:
+            _tl   = _p.get("tipo", "—")
+            _cdot = _COLOR_TIPO.get(_tl, "#808080")
+            _hor  = _p.get("horario", "")    or _HORARIO_DEFAULT.get(_tl, "")
+            _mat  = _p.get("materiales", "") or _MATERIALES_DEFAULT.get(_tl, "")
+            _hor_html = (f'<div style="font-size:0.75rem;color:#81c784;margin-top:2px;">🕐 {_hor}</div>'
+                         if _hor else "")
+            _mat_html = (f'<div style="font-size:0.75rem;color:#aed6bf;margin-top:1px;">♻️ {_mat}</div>'
+                         if _mat else "")
             st.markdown(f"""
             <div class="punto-verde-card">
                 <div class="punto-verde-nombre">
-                    <span style="display:inline-block;width:10px;height:10px;background:{color_dot};border-radius:50%;margin-right:6px;"></span>
-                    {p['nombre']}
+                    <span style="display:inline-block;width:10px;height:10px;background:{_cdot};border-radius:50%;margin-right:6px;"></span>
+                    {_p['nombre']}
                 </div>
-                <div style="font-size:0.78rem;color:#555;margin-bottom:2px;">{tipo_label}</div>
-                <div class="punto-verde-dir">📍 {p['direccion']}</div>
-                <div class="punto-verde-dist">🚶 {int(p['dist_km']*1000)} metros de distancia</div>
+                <div style="font-size:0.78rem;color:#555;margin-bottom:2px;">{_tl}</div>
+                <div class="punto-verde-dir">📍 {_p['direccion']}</div>
+                <div class="punto-verde-dist">🚶 {int(_p['dist_km']*1000)} metros de distancia</div>
+                {_hor_html}
+                {_mat_html}
             </div>
             """, unsafe_allow_html=True)
-    elif puntos is not None:
-        st.warning("No se encontraron puntos en un radio de 300 m.")
+
+    elif _puntos is not None:
+        st.info("No se encontraron puntos cercanos. Intentá con otra dirección.")
 
     st.caption("Datos: [Portal de Datos Abiertos de CABA](https://data.buenosaires.gob.ar/dataset/puntos-verdes)")
