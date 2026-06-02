@@ -66,7 +66,7 @@ La app abre en `http://localhost:8501`. Para las siguientes ejecuciones solo es 
 
 ### App Streamlit (online)
 
-![alt text](qr-code.png)
+<img src="qr-code.png" alt="Qr de la web" width="300">
 
 [Ver la app desplegada](https://clasificador--residuos.streamlit.app/) 
 
