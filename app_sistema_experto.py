@@ -582,46 +582,14 @@ with tab3:
         st.session_state["tab3_busq_lon"]    = lon
         st.session_state["tab3_tipos_busq"]  = frozenset(_tipos_busq) if _tipos_busq else None
 
-    def _cargar_todos():
-        """
-        Carga todos los puntos del DataFrame sin filtro de distancia para el modo 'Ver todos'.
-        Usa un caché en session_state para no reconstruir la lista en cada rerun.
-        Establece el centro del mapa en el centroide de CABA y el modo en 'todos'.
-        """
-        if DF_PUNTOS_VERDES is None or DF_PUNTOS_VERDES.empty:
-            return
-        # Construir lista completa sin filtro de distancia (cacheada en session_state)
-        if "tab3_todos_cache" not in st.session_state:
-            _df = DF_PUNTOS_VERDES.dropna(subset=["lat", "lon"])
-            st.session_state["tab3_todos_cache"] = [
-                {
-                    "nombre"    : str(r.get("nombre", "—")),
-                    "tipo"      : str(r.get("tipo", "—")),
-                    "direccion" : str(r.get("direccion", "—")),
-                    "dist_km"   : 0.0,
-                    "lat"       : float(r["lat"]),
-                    "lon"       : float(r["lon"]),
-                    "horario"   : str(r["horario"])    if pd.notna(r.get("horario", ""))    else "",
-                    "materiales": str(r["materiales"]) if pd.notna(r.get("materiales", "")) else "",
-                }
-                for r in _df.to_dict("records")
-            ]
-        st.session_state["tab3_puntos"]   = st.session_state["tab3_todos_cache"]
-        st.session_state["tab3_busq_lat"] = -34.6083
-        st.session_state["tab3_busq_lon"] = -58.3712
-        st.session_state["tab3_modo"]     = "todos"
-
     # ── Botones de modo ───────────────────────────────────────────────────────
-    _col_b1, _col_b2, _col_b3 = st.columns(3)
+    _col_b1, _col_b2 = st.columns(2)
     with _col_b1:
         if st.button("📍 Usar mi ubicación", use_container_width=True):
             st.session_state["tab3_modo"] = "geo"
     with _col_b2:
         if st.button("✏️ Ingresar dirección", use_container_width=True):
             st.session_state["tab3_modo"] = "dir"
-    with _col_b3:
-        if st.button("🗺️ Ver todos", use_container_width=True):
-            _cargar_todos()
 
     _modo = st.session_state["tab3_modo"]
 
@@ -673,9 +641,6 @@ with tab3:
     if _puntos:
         import pydeck as pdk
 
-        _modo_actual = st.session_state.get("tab3_modo")
-        _es_todos    = _modo_actual == "todos"
-
         # Filtrar por tipos seleccionados
         _tipos_csv_sel = {_FILTRO_A_TIPO[k] for k in _tipos_sel_t3} \
                          if _tipos_sel_t3 else set(_FILTRO_A_TIPO.values())
@@ -683,7 +648,7 @@ with tab3:
 
         # Fallback: si el filtro cambió después de la búsqueda y no hay resultados,
         # hacer una búsqueda ampliada para los tipos pedidos (cacheada en session_state)
-        if not _puntos_fil and not _es_todos and _tipos_csv_sel and _busq_lat != -34.6083:
+        if not _puntos_fil and _tipos_csv_sel and _busq_lat != -34.6083:
             _ck = "_fb_" + "_".join(sorted(_tipos_csv_sel)) + f"_{_busq_lat:.5f}_{_busq_lon:.5f}"
             if _ck not in st.session_state:
                 st.session_state[_ck] = puntos_cercanos(
@@ -735,22 +700,19 @@ with tab3:
                 get_radius=10, radius_min_pixels=8, radius_max_pixels=8,
                 pickable=True,
             ))
-        if not _es_todos:
-            # Capa adicional para mostrar la posición del usuario 
-            _capas.append(pdk.Layer(
-                "ScatterplotLayer",
-                [{"lon": _busq_lon, "lat": _busq_lat, "nombre": "Tu ubicación",
-                  "tipo": "", "direccion": "", "distancia": "", "horario": "",
-                  "materiales": "", "color": _COLOR_USUARIO_RGB, "radio_px": 10}],
-                get_position=["lon", "lat"], get_fill_color="color",
-                get_radius=10, radius_min_pixels=10, radius_max_pixels=10,
-                pickable=True,
-            ))
+        # Capa adicional para mostrar la posición del usuario
+        _capas.append(pdk.Layer(
+            "ScatterplotLayer",
+            [{"lon": _busq_lon, "lat": _busq_lat, "nombre": "Tu ubicación",
+              "tipo": "", "direccion": "", "distancia": "", "horario": "",
+              "materiales": "", "color": _COLOR_USUARIO_RGB, "radio_px": 10}],
+            get_position=["lon", "lat"], get_fill_color="color",
+            get_radius=10, radius_min_pixels=10, radius_max_pixels=10,
+            pickable=True,
+        ))
 
         # ── Cálculo de vista del mapa (centro y zoom dinámico) ────────────────
-        if _es_todos:
-            _view_lat, _view_lon, _zoom = _busq_lat, _busq_lon, 12
-        elif _puntos_fil:
+        if _puntos_fil:
             # Centrar entre ubicación del usuario y centroide de puntos visibles
             _avg_lat = sum(p["lat"] for p in _puntos_fil) / len(_puntos_fil)
             _avg_lon = sum(p["lon"] for p in _puntos_fil) / len(_puntos_fil)
@@ -806,17 +768,9 @@ with tab3:
         st.markdown(_leyenda_html, unsafe_allow_html=True)
 
         # ── Resumen y cards de resultados ─────────────────────────────────────
-        if _es_todos:
-            # Modo "Ver todos": muestra el total y omite las cards si hay demasiados puntos
-            st.markdown(f"**{len(_puntos_fil)} puntos en CABA** ({_titulo_t3})")
-            if len(_puntos_fil) > 50:
-                st.caption(f"Lista omitida por cantidad — usá el mapa para explorar.")
-                _puntos_fil = []   # no renderizar cards
-        else:
-            # Modo búsqueda cercana: indica cuántos puntos se encontraron y en qué radio
-            _radio_real = int(max(p["dist_km"] for p in _puntos_fil) * 1000) if _puntos_fil else 0
-            _radio_txt  = f"{_radio_real} m" if _radio_real <= 300 else f"~{_radio_real} m (radio ampliado)"
-            st.markdown(f"**{len(_puntos_fil)} puntos** en {_radio_txt} ({_titulo_t3}):")
+        _radio_real = int(max(p["dist_km"] for p in _puntos_fil) * 1000) if _puntos_fil else 0
+        _radio_txt  = f"{_radio_real} m" if _radio_real <= 300 else f"~{_radio_real} m (radio ampliado)"
+        st.markdown(f"**{len(_puntos_fil)} puntos** en {_radio_txt} ({_titulo_t3}):")
         
         # Renderiza una card HTML para cada punto encontrado
         for _p in _puntos_fil:
