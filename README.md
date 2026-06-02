@@ -39,25 +39,30 @@ Construir un **Sistema Experto basado en reglas** capaz de clasificar residuos d
 
 El sistema recibe una descripción de un residuo (por texto o imagen) y devuelve:
 
-- **Categoría** del residuo (reciclable, orgánico, especial, basura común)
+- **Categoría** del residuo (reciclable, orgánico, especial, peligroso, basura común)
 - **Instrucciones** paso a paso para descartarlo correctamente
 - **Errores comunes** a evitar con ese material
 - **Impacto ambiental** si se recicla o descarta correctamente
-- **Puntos Verdes más cercanos** según la ubicación del usuario (CABA)
+- **Enlace directo al mapa** de Puntos Verdes filtrado por el tipo de destino del residuo clasificado
+- **Mapa interactivo** con Puntos Verdes, Contenedores y Centros RSU cercanos (CABA), filtrables por tipo y accesibles desde la URL
+
+Las reglas y categorías están alineadas con la normativa vigente: **Ley CABA 1854/2005**, **Decreto GCBA 639/07**, **Ley CABA 5991/2018**, **Ley Nacional 25.916**, **Código IRAM 13700** (plásticos) y los Convenios de **Basilea** y **Estocolmo** (residuos peligrosos y COPs).
 
 ---
 ##  Cómo Ejecutar el Proyecto
 
-Se deben de tener instaladas las dependencias indicadas en [requirements.txt](./requirements.txt):
+Crear un entorno virtual e instalar dependencias:
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
 ###  Ejecutar la app
-Para correr la aplicación mejorada que resuelve las limitaciones lógicas y de negocio del sistema experto:
 ```bash
 streamlit run app_sistema_experto.py
 ```
+La app abre en `http://localhost:8501`. Para las siguientes ejecuciones solo es necesario activar el entorno virtual y correr el comando anterior.
 
 ### App Streamlit (online)
 
@@ -161,8 +166,8 @@ if not hasattr(collections, 'Callable'):
 * **`cargar_sistema()`:** Lee tres archivos fundamentales:
   1. `keywords.csv`: Mapea keywords del lenguaje natural a tipos de residuos.
   2. `reglas.csv`: Define las propiedades de destino (contenedor, instrucciones, impacto, urgencia) por tipo de residuo.
-  3. `ambiguos.csv`: Almacena términos conflictivos (ej. "botella" puede ser de plástico, vidrio o vidrio roto) y las preguntas guiadas para resolverlos.
-* **`cargar_puntos_verdes()`:** Consume la API pública del Gobierno de la Ciudad de Buenos Aires (GCBA) con los centros de reciclaje.
+  3. `ambiguos.csv`: Almacena términos conflictivos y las preguntas guiadas para resolverlos. Cubre materiales genéricos según IRAM 13700: **plástico** (PET / film / rígido / PVC / EPS), **vidrio** (reciclable / no reciclable), **metal** (lata / cable-RAEE), **lámpara** (fluorescente / LED / halógena), además de botella, frasco, envase, papel, bolsa y aceite.
+* **`cargar_puntos_verdes()`:** Lee el dataset local de Puntos Verdes del Gobierno de la Ciudad de Buenos Aires (GCBA), incluyendo campos de `horario` y `materiales` aceptados por punto.
 
 ---
 
@@ -225,16 +230,17 @@ La función `coincide_keyword` compila estas regex respetando límites de palabr
 
 ### E. Geoposicionamiento: src/geo.py
 **Propósito:** Calcular qué Puntos Verdes físicos se encuentran más cercanos a la ubicación introducida por el usuario.
-* **Fórmula de Haversine:** Calcula la distancia ortodrómica sobre la superficie de una esfera (de radio terrestre medio $R = 6371$ km) a partir de diferencias de latitud y longitud.
-* **Flexibilidad de Columnas:** Inspecciona dinámicamente las columnas del CSV del Gobierno de la Ciudad mediante búsquedas difusas (`lat` en el nombre de la columna, `lon`/`lng`/`long` para longitud, etc.), permitiendo que el formato del CSV cambie sin romper la aplicación.
-* **Selección Eficiente:** Retorna los $N$ registros cercanos (300 metros).
+* **Fórmula de Haversine:** Calcula la distancia ortodrómica sobre la superficie de una esfera ($R = 6371$ km) a partir de diferencias de latitud y longitud.
+* **Flexibilidad de Columnas:** Inspecciona dinámicamente las columnas del CSV mediante búsquedas difusas, permitiendo que el formato del dataset cambie sin romper la aplicación.
+* **Radio dinámico con filtro de tipos:** `puntos_cercanos(lat, lon, df, radio_km=0.3, minimo=2, tipos=None)` — si el radio fijo devuelve menos de `minimo` puntos **del tipo solicitado**, expande automáticamente el radio hasta incluirlos. Esto garantiza que el mapa siempre muestre resultados relevantes aunque el tipo de punto esté lejos (ej. un Punto Verde Con Atención a 2.4 km).
+* **Horario y materiales:** Retorna los campos `horario` y `materiales` de cada punto para su visualización en tooltips y tarjetas.
 
 ---
 
 ### F. Interfaz de Usuario: src/ui.py
 **Propósito:** Darle una estética premium y renderizar de forma uniforme los resultados del motor.
 * **`inyectar_estilos()`:** Lee directamente el archivo [src/style.css] y lo inserta en Streamlit en una etiqueta `<style>` con la opción `unsafe_allow_html=True`.
-* **`mostrar_resultado(...)`:** Renderiza el contenedor final combinando código HTML y clases dinámicas. Si hay una discrepancia entre el tipo inicial y el tipo inferido final (por ejemplo, de `vidrio` a `vidrio_no_reciclable`), dibuja una transición visual explícita indicando al usuario la razón física del cambio.
+* **`mostrar_resultado(...)`:** Renderiza el contenedor final combinando código HTML y clases dinámicas. Si hay una discrepancia entre el tipo inicial y el tipo inferido final (por ejemplo, de `vidrio` a `vidrio_no_reciclable`), dibuja una transición visual explícita indicando al usuario la razón física del cambio. Al final de cada resultado muestra un **enlace al mapa** (`?tipos=<filtro>`) que lleva directamente a la Pestaña 3 con el tipo de punto correspondiente pre-seleccionado.
 
 ---
 
@@ -264,6 +270,18 @@ Esto asegura que las variables de estado físico sean persistentes y consistente
 
 #### 2. Ejemplos Rápidos Inteligentes
 El frontend expone botones para pruebas rápidas. Cuando el usuario hace clic en *"caja de pizza"*, un callback autodetecta el material e infiere lógicamente que contiene restos de grasa/aceite, desmarcando automáticamente el checkbox de **Está Limpio** en el frontend para forzar al motor a reclasificarlo como papel no reciclable.
+
+#### 3. Mapa Interactivo con Filtros (Pestaña 3)
+La pestaña de mapa permite explorar los puntos de descarte en CABA con las siguientes capacidades:
+
+* **Filtros por tipo** (checkboxes): Con Atención · Contenedor Verde · Centro de Clasificación RSU · Contenedor Negro. Todos activos por defecto.
+* **Filtro por URL**: el parámetro `?tipos=con_atencion` (o combinaciones separadas por coma como `?tipos=con_atencion,contenedor_verde`) pre-selecciona los filtros al abrir la pestaña. Esto permite que el enlace del resultado de clasificación lleve directamente al mapa con el filtro correcto.
+* **Título dinámico**: se actualiza según los filtros activos, p. ej. *"Ubicación de Con Atención en CABA"*.
+* **Tres modos de búsqueda**: geolocalización del navegador · ingreso de dirección (con Enter para buscar) · Ver todos.
+* **Radio adaptativo**: el radio (300 m por defecto) se expande automáticamente hasta incluir al menos 2 puntos del tipo filtrado. Cuando el radio se amplía, se informa al usuario.
+* **Zoom automático**: el mapa se centra entre la ubicación del usuario y el centroide de los puntos visibles, y ajusta el zoom para que ambos queden en pantalla.
+* **Tooltips enriquecidos**: cada punto muestra nombre, tipo, dirección, distancia, horario de atención y materiales aceptados.
+* **Auto-navegación**: si la URL tiene el parámetro `?tipos=...`, el sistema navega automáticamente a la Pestaña 3 al cargar la página.
 
 ---
 
@@ -328,14 +346,17 @@ A continuación se detalla cómo razona el motor con un ejemplo: **caja de pizza
 
 | Categoría | Tipos de residuos cubiertos |
 |---|---|
-| ♻️ Reciclables | Plástico PET, Bolsas/Film, Vidrio, Papel, Cartón, Tetrabrik, Latas |
-| 🌱 Orgánicos | Restos de comida, frutas, verduras, yerba, café |
-| ⚠️ Especiales | Pilas/Baterías, Medicamentos, Aceite de cocina, Electrónicos (RAEE) |
-| 🚫 Basura común | Papel higiénico, Pañales, Telgopor, Papel no reciclable |
-| 🖥️ RAEE | Celulares, computadoras, electrodomésticos |
-| ❓ Desconocido | Manejo por defecto con orientación general |
+| ♻️ Reciclables | Plástico PET, Bolsas/Film, Plástico rígido (HDPE/PP), Vidrio, Papel, Cartón, Tetrabrik, Latas, Aerosoles vacíos |
+| 🌱 Orgánicos | Restos de comida, frutas, verduras, yerba, café, poda |
+| ⚠️ Especiales | Pilas AA/AAA/botón, Batería de auto (plomo-ácido), Medicamentos, Aceite de cocina, Aceite de motor, Electrónicos/RAEE, Lámparas fluorescentes/CFL, Lámparas LED, Ropa y textiles, Neumáticos, Madera/muebles |
+| ⚠️ Peligrosos | Pinturas/barnices/solventes, PVC (código 03) |
+| 🚫 Basura común | Papel higiénico, Pañales, Telgopor/EPS, Papel metalizado/encerado, Vidrio no reciclable |
+| 🏗️ Voluminosos/Especiales | Escombros y residuos de construcción (Decreto GCBA 639/07) |
+| ❓ Desconocido | Orientación general con derivación al municipio |
 
-La base de conocimiento es **extensible sin modificar el código**: agregar un material nuevo implica sólo agregar filas en los CSV.
+> **31 tipos de residuos** clasificados, alineados con Ley CABA 1854, Decreto 639/07, IRAM 13700, Ley 5991/2018 y Convenios de Basilea y Estocolmo.
+
+La base de conocimiento es **extensible sin modificar el código**: agregar un material nuevo implica solo agregar filas en los CSV.
 
 ---
 
@@ -344,18 +365,15 @@ La base de conocimiento es **extensible sin modificar el código**: agregar un m
 
 | Librería | Uso |
 |---|---|
-| `experta==1.9.4` | Motor de inferencia (KnowledgeEngine) |
+| `experta==1.9.4` | Motor de inferencia (KnowledgeEngine + Forward Chaining) |
 | `pandas` | Carga y procesamiento de CSV |
-| `google-generativeai` | Clasificación por imagen con Gemini |
-| `streamlit` | Interfaz web opcional |
-| `matplotlib` | Visualización del árbol de decisión |
-| `collections` | Acceso a clases contenedoras que mejoran los tipos estándar |
-| `collections.abc` | Jerarquía de clases abstractas o para crear estructuras de datos personalizadas |
-| `os` | Módulo del Sistema Operativo |
-| `re` | Buscar, validar y manipular texto utilizando patrones complejos |
-| `math` | Funciones matemáticas avanzadas y constantes numéricas |
-| `get_geolocation de streamlit_js_eval` | Ubicación del usuario desde el navegador |
-| `pydeck` | Visualizaciones interactivas de datos geoespaciales y mapas en 2D y 3D |
+| `google-genai` | Clasificación por imagen con Gemini 2.5 Flash |
+| `streamlit>=1.32` | Interfaz web |
+| `streamlit-js-eval` | Geolocalización del usuario desde el navegador |
+| `pydeck` | Mapa interactivo con capas geoespaciales |
+| `collections.abc` | Compatibilidad con `experta` en Python 3.10+ |
+| `math` | Fórmula de Haversine para cálculo de distancias |
+| `re` | Expresiones regulares para detección de keywords y plurales |
 
 ---
 
