@@ -139,6 +139,7 @@
 
   .mod-editor  { background: #1e6b5e; border: 1px solid #2a9d8a; }
   .mod-motor   { background: #8b3a0f; border: 2px solid #e05c1a; }
+  .mod-explic  { background: #2a4a1e; border: 1px solid #6aab3a; }
   .mod-geo     { background: #1e4a6b; border: 1px solid #2a7fd4; }
   .mod-vision  { background: #3a1e6b; border: 1px solid #8a5cd4; }
 
@@ -292,6 +293,23 @@
           <strong>Intermedio:</strong> <code>Fact Clasificado</code> (tipo_final, explicacion)<br>
           <strong>Salida:</strong> <code>Fact Clasificacion</code> (categoria, contenedor, instrucciones…)<br>
           Reglas dinámicas generadas por <code>construir_motor()</code> desde CSV
+        </div>
+      </div>
+
+      <div class="module mod-explic">
+        <div class="mod-title">💬 Sistema de Explicaciones</div>
+        <div class="mod-detail">
+          <code>src/ui.py</code> · <code>mostrar_resultado()</code><br>
+          <strong>1. Tipo detectado</strong> — categoria · subcategoria · tipo<br>
+          <strong>2. Reclasificación</strong> — aviso si el motor cambió el tipo:<br>
+          &nbsp;&nbsp;<em>tipo_original ➔ tipo_final</em> + motivo<br>
+          <strong>3. Razonamiento</strong> — texto generado por la regla disparada<br>
+          &nbsp;&nbsp;<em>(campo <code>explicacion</code> del <code>Fact Clasificado</code>)</em><br>
+          <strong>4. Estado físico evaluado</strong> — badges limpio / seco / roto<br>
+          <strong>5. Instrucciones</strong> — pasos ordenados desde <code>reglas.csv</code><br>
+          <strong>6. Errores comunes</strong> — advertencias prácticas<br>
+          <strong>7. Impacto ambiental</strong> — dato educativo del tipo<br>
+          <strong>8. Link al mapa</strong> — navega a pestaña 3 con filtro por tipo
         </div>
       </div>
 
