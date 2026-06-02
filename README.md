@@ -66,6 +66,8 @@ La app abre en `http://localhost:8501`. Para las siguientes ejecuciones solo es 
 
 ### App Streamlit (online)
 
+![alt text](qr-code.png)
+
 [Ver la app desplegada](https://clasificador--residuos.streamlit.app/) 
 
 ---
@@ -100,7 +102,7 @@ La clasificación por imagen usa **Google Gemini 2.5 Flash**, cuya API es gratui
 * [src/data.py](./src/data.py): Módulo encargado de la carga de base de conocimientos desde CSVs.
 * [src/ui.py](./src/ui.py): Funciones auxiliares para renderizar las tarjetas y el diseño visual.
 * [src/style.css](./src/style.css): Hoja de estilos personalizada para dar una estética premium.
-* [data/](./data): Carpeta con los archivos de conocimiento (`reglas.csv`, `keywords.csv`, `ambiguos.csv`, `contenedores_verdes.csv`, `Centros_clasificacion_RSU_verdes_clean.csv`, `puntos_verdes_recuparado.csv`, `puntos_verdes.csv`).
+* [data/](./data): Carpeta con los archivos de conocimiento (`reglas.csv`, `keywords.csv`, `ambiguos.csv`, `puntos_verdes.csv`).
 * [Reciclaje/](./Reciclaje): Carpeta que contiene imágenes de prueba organizadas por tipo de residuo y contenedor para validar el funcionamiento del módulo de visión computacional.
 
 
@@ -356,7 +358,7 @@ A continuación se detalla cómo razona el motor con un ejemplo: **caja de pizza
 
 > **31 tipos de residuos** clasificados, alineados con Ley CABA 1854, Decreto 639/07, IRAM 13700, Ley 5991/2018 y Convenios de Basilea y Estocolmo.
 
-La base de conocimiento es **extensible sin modificar el código**: agregar un material nuevo implica solo agregar filas en los CSV.
+La base de conocimiento es **extensible sin modificar el código**: agregar un material nuevo implica sólo agregar filas en los CSV.
 
 ---
 
@@ -365,15 +367,18 @@ La base de conocimiento es **extensible sin modificar el código**: agregar un m
 
 | Librería | Uso |
 |---|---|
-| `experta==1.9.4` | Motor de inferencia (KnowledgeEngine + Forward Chaining) |
+| `experta==1.9.4` | Motor de inferencia (KnowledgeEngine) |
 | `pandas` | Carga y procesamiento de CSV |
-| `google-genai` | Clasificación por imagen con Gemini 2.5 Flash |
-| `streamlit>=1.32` | Interfaz web |
-| `streamlit-js-eval` | Geolocalización del usuario desde el navegador |
-| `pydeck` | Mapa interactivo con capas geoespaciales |
-| `collections.abc` | Compatibilidad con `experta` en Python 3.10+ |
-| `math` | Fórmula de Haversine para cálculo de distancias |
-| `re` | Expresiones regulares para detección de keywords y plurales |
+| `google-generativeai` | Clasificación por imagen con Gemini |
+| `streamlit` | Interfaz web opcional |
+| `matplotlib` | Visualización del árbol de decisión |
+| `collections` | Acceso a clases contenedoras que mejoran los tipos estándar |
+| `collections.abc` | Jerarquía de clases abstractas o para crear estructuras de datos personalizadas |
+| `os` | Módulo del Sistema Operativo |
+| `re` | Buscar, validar y manipular texto utilizando patrones complejos |
+| `math` | Funciones matemáticas avanzadas y constantes numéricas |
+| `get_geolocation de streamlit_js_eval` | Ubicación del usuario desde el navegador |
+| `pydeck` | Visualizaciones interactivas de datos geoespaciales y mapas en 2D y 3D |
 
 ---
 
