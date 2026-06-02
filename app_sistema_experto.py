@@ -578,6 +578,9 @@ with tab3:
     if _puntos:
         import pydeck as pdk
 
+        _modo_actual = st.session_state.get("tab3_modo")
+        _es_todos    = _modo_actual == "todos"
+
         # Filtrar por tipos seleccionados
         _tipos_csv_sel = {_FILTRO_A_TIPO[k] for k in _tipos_sel_t3} \
                          if _tipos_sel_t3 else set(_FILTRO_A_TIPO.values())
@@ -592,7 +595,7 @@ with tab3:
                     _busq_lat, _busq_lon, DF_PUNTOS_VERDES,
                     radio_km=0.3, minimo=2, tipos=list(_tipos_csv_sel),
                 )
-            _puntos_fil = st.session_state[_ck]
+            _puntos_fil = [p for p in st.session_state[_ck] if p.get("tipo", "") in _tipos_csv_sel]
 
         # Preparar datos completando horario/materiales con defaults por tipo
         _puntos_data = []
@@ -612,9 +615,6 @@ with tab3:
                 "color":      _COLOR_TIPO_RGB.get(_tp, [128, 128, 128, 200]),
                 "radio_px":   _RADIO_TIPO.get(_tp, _RADIO_TIPO["default"]),
             })
-
-        _modo_actual = st.session_state.get("tab3_modo")
-        _es_todos    = _modo_actual == "todos"
 
         _datos_peq  = [p for p in _puntos_data if p["tipo"] != "Contenedor Verde"]
         _datos_verd = [p for p in _puntos_data if p["tipo"] == "Contenedor Verde"]
