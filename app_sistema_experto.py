@@ -178,17 +178,12 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("""
-    <div style="text-align:center">
-                <div style="font-size:1.2rem">🔧 Configuración</div>
-                <div style="font-size:1.4rem">API Key de Gemini</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("**🔧 Configuración**")
 
     # Campo de texto enmascarado para ingresar la API Key de Gemini.
     # Es necesaria para usar la funcionalidad de clasificación por imagen (Tab 2).
     gemini_key = st.text_input(
-        "",
+        "API Key de Gemini",
         type="password",
         placeholder="Para clasificación por imagen",
         help="Obtené tu key gratis en aistudio.google.com"
@@ -196,34 +191,10 @@ with st.sidebar:
 
     st.markdown("---")
     # Métricas que muestran el tamaño actual de la base de conocimiento cargada
-    st.markdown("""
-    <div style="font-size:1.2rem; text-align:center">📊 Base de conocimiento</div>
-    """, unsafe_allow_html=True)
-    st.markdown("""
-    <style>
-        /* Centra todo el bloque contenedor de la métrica */
-        [data-testid="stMetric"] {
-            display: flex;
-            justify-content: center;
-            text-align: center;
-        }
-        
-        /* Centra la etiqueta (label), el valor y el delta internamente */
-        [data-testid="stMetric"] > div {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 2, 1])  # Estructura de 3 columnas
-
-    with col2:
-        st.metric("Tipos de residuos", len(REGLAS_DICT))
-        st.metric("Keywords activas", sum(len(v) for v in KEYWORDS_DICT.values()))
-        st.metric("Términos ambiguos", len(AMBIGUOS_DICT))
+    st.markdown("**📊 Base de conocimiento**")
+    st.metric("Tipos de residuos", len(REGLAS_DICT))
+    st.metric("Keywords activas", sum(len(v) for v in KEYWORDS_DICT.values()))
+    st.metric("Términos ambiguos", len(AMBIGUOS_DICT))
 
     st.markdown("---")
     # Información estática sobre los motores y fuentes de datos utilizados
