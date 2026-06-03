@@ -66,7 +66,7 @@ La app abre en `http://localhost:8501`. Para las siguientes ejecuciones solo es 
 
 ### App Streamlit (online)
 
-<img src="qr-code.png" alt="Qr de la web" width="300">
+<img src="data/qr-code.png" alt="Qr de la web" width="300">
 
 [Ver la app desplegada](https://clasificador--residuos.streamlit.app/) 
 
@@ -121,8 +121,6 @@ El repositorio está estructurado en módulos para separar la interfaz de usuari
 │
 ├── data/                      # Base de conocimientos en CSV
 │   │
-│   ├── Centros_clasificacion_RSU_verdes_clean.csv
-│   ├── puntos_verdes_recuparado.csv
 │   ├── puntos_verdes.csv                       
 │   ├── reglas.csv
 │   ├── keywords.csv
@@ -279,7 +277,7 @@ La pestaña de mapa permite explorar los puntos de descarte en CABA con las sigu
 * **Filtros por tipo** (checkboxes): Con Atención · Contenedor Verde · Centro de Clasificación RSU · Contenedor Negro. Todos activos por defecto.
 * **Filtro por URL**: el parámetro `?tipos=con_atencion` (o combinaciones separadas por coma como `?tipos=con_atencion,contenedor_verde`) pre-selecciona los filtros al abrir la pestaña. Esto permite que el enlace del resultado de clasificación lleve directamente al mapa con el filtro correcto.
 * **Título dinámico**: se actualiza según los filtros activos, p. ej. *"Ubicación de Con Atención en CABA"*.
-* **Tres modos de búsqueda**: geolocalización del navegador · ingreso de dirección (con Enter para buscar) · Ver todos.
+* **Dos modos de búsqueda**: geolocalización del navegador · ingreso de dirección (con Enter para buscar) ·
 * **Radio adaptativo**: el radio (300 m por defecto) se expande automáticamente hasta incluir al menos 2 puntos del tipo filtrado. Cuando el radio se amplía, se informa al usuario.
 * **Zoom automático**: el mapa se centra entre la ubicación del usuario y el centroide de los puntos visibles, y ajusta el zoom para que ambos queden en pantalla.
 * **Tooltips enriquecidos**: cada punto muestra nombre, tipo, dirección, distancia, horario de atención y materiales aceptados.
