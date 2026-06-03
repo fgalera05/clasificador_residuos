@@ -140,7 +140,7 @@ def mostrar_resultado(regla: dict, tipo: str, limpio: bool = True, seco: bool = 
     if _filtro:
         _flabel = _FILTRO_LABEL_MAPA.get(_filtro, "el mapa")
         st.markdown(
-            f'<a href="?tipos={_filtro}" style="display:inline-flex;align-items:center;gap:6px;'
+            f'<a target="_self" href="?tipos={_filtro}" style="display:inline-flex;align-items:center;gap:6px;'
             f'background:#1a3a2a;color:#81c784;border:1px solid #2d5a3d;padding:8px 16px;'
             f'border-radius:8px;text-decoration:none;font-size:0.88rem;margin-top:8px;">'
             f'📍 Ver {_flabel} en el mapa →</a>',
