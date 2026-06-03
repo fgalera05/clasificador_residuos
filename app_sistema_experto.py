@@ -632,6 +632,8 @@ with tab3:
                     else:
                         st.warning("No se encontró la dirección.")
                 except Exception:
+                    import traceback
+                    print(traceback.format_exc())
                     st.error("Error al geocodificar. Verificá tu conexión.")
 
     _puntos   = st.session_state.get("tab3_puntos")
