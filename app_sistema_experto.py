@@ -177,8 +177,10 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("**🔧 Configuración**")
+    st.html("<hr style='border-top: 0.5px solid #67DB5E;'>")
+    st.markdown("""
+                <div style="color:white;font-size:1.1rem">🔧 Configuración</div>
+                """, unsafe_allow_html=True)
 
     # Campo de texto enmascarado para ingresar la API Key de Gemini.
     # Es necesaria para usar la funcionalidad de clasificación por imagen (Tab 2).
@@ -189,14 +191,16 @@ with st.sidebar:
         help="Obtené tu key gratis en aistudio.google.com"
     )
 
-    st.markdown("---")
+    st.html("<hr style='border-top: 0.5px solid #67DB5E;'>")
     # Métricas que muestran el tamaño actual de la base de conocimiento cargada
-    st.markdown("**📊 Base de conocimiento**")
+    st.markdown("""
+                <div style="color:white;font-size:1.1rem">📊 Base de conocimiento</div>
+                """, unsafe_allow_html=True)
     st.metric("Tipos de residuos", len(REGLAS_DICT))
     st.metric("Keywords activas", sum(len(v) for v in KEYWORDS_DICT.values()))
     st.metric("Términos ambiguos", len(AMBIGUOS_DICT))
 
-    st.markdown("---")
+    st.html("<hr style='border-top: 0.5px solid #67DB5E;'>")
     # Información estática sobre los motores y fuentes de datos utilizados
     st.markdown("""
     <div style="font-size:1.1rem; color:#88bda3; line-height:1.6; text-align:center">
@@ -324,7 +328,7 @@ with tab1:
             mostrar_resultado(regla, tipo, limpio=limpio, seco=seco, roto=roto)
 
     # Ejemplos rápidos
-    st.markdown("---")
+    st.html("<hr style='border-top: 0.5px solid #67DB5E;'>")
     st.markdown("**⚡ Ejemplos rápidos**")
     ejemplos = [
         "botella de gaseosa", "pila gastada", "aceite de cocina usado",
@@ -382,6 +386,24 @@ with tab2:
         st.warning("⚠️ Ingresá tu API Key de Gemini en el panel izquierdo para usar esta función. Podés obtenerla gratis en [aistudio.google.com](https://aistudio.google.com).")
     else:
         # Widget de carga de imagen; acepta JPG, JPEG, PNG y WEBP
+        st.markdown(
+                f"""
+                <style>
+                /* Apunta directamente al botón interno del file uploader */
+                div[data-testid="stFileUploader"] [data-testid="stBaseButton-secondary"] {{
+                    font-weight: {700} !important;
+                    background-color: #000000 !important;
+                }}
+                
+                /* Opcional: Apunta también al texto secundario "Limit 200MB per file..." */
+                div[data-testid="stFileUploaderDropzoneInstructions"] div span,
+                div[data-testid="stFileUploaderDropzoneInstructions"] div small {{
+                    font-weight: {700} !important;
+                }}
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
         imagen = st.file_uploader(
             "Subir imagen",
             type=["jpg", "jpeg", "png", "webp"],

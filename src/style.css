@@ -418,6 +418,16 @@ section[data-testid="stSidebar"] {
     font-weight: 700 !important;
 }
 
+[data-testid="stMetric"] *,
+[data-testid="stTextInput"] ::placeholder,
+[data-testid="stWidgetLabel"],
+[data-testid="stNumberInput"] *, 
+[data-testid="stSelectbox"] *,
+[data-testid="stCheckbox"] *,
+[data-testid="stRadio"] *{ color:white !important}
+
+[data-testid="stTextInput"] ::placeholder{font-size: 0.8rem;}
+
 [data-testid="stAlert"],
 [data-testid="stWarningContainer"] {
     background-color: #d8ca9b !important;
